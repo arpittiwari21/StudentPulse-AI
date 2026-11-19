@@ -45,14 +45,14 @@ export default function Dashboard() {
       <Sidebar activeTab={activeTab} onSelectTab={setActiveTab} />
 
       {/* Main Workspace Area */}
-      <div className="ml-[240px] flex-1 min-w-0 flex flex-col bg-[#09090B]">
+      <div className="ml-[240px] flex-1 min-w-0 overflow-x-hidden flex flex-col bg-[#09090B]">
         <Header
           title={currentTabInfo.title}
           subtitle={currentTabInfo.subtitle}
           onOpenContextModal={() => setShowContextModal(true)}
         />
 
-        <main className="flex-1 bg-[#09090B]">
+        <main className="flex-1 min-w-0 overflow-x-hidden bg-[#09090B]">
           {activeTab === 'overview' && (
             <OverviewView key={refreshKey} onNavigateTab={setActiveTab} />
           )}

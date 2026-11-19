@@ -118,10 +118,10 @@ function RadarChart({ labels, scores }) {
         maintainAspectRatio: false,
         layout: {
           padding: {
-            top: 12,
-            bottom: 20,
-            left: 18,
-            right: 18,
+            top: 16,
+            bottom: 24,
+            left: 32,
+            right: 32,
           },
         },
         scales: {
@@ -147,7 +147,7 @@ function RadarChart({ labels, scores }) {
                 weight: '600',
               },
               color: '#9CA3AF',
-              padding: 14,
+              padding: 16,
             },
           },
         },
@@ -167,7 +167,7 @@ function RadarChart({ labels, scores }) {
             cornerRadius: 8,
             displayColors: false,
             callbacks: {
-              label: (context) => ` Score: ${context.raw}%`,
+              label: (context) => ` ${context.label}: ${context.raw}%`,
             },
           },
         },
@@ -182,14 +182,14 @@ function RadarChart({ labels, scores }) {
   }, [labels, scores]);
 
   return (
-    <div className="w-full h-[270px] relative px-2 py-1">
+    <div className="w-full h-[290px] relative px-3 py-1">
       <canvas ref={canvasRef} />
     </div>
   );
 }
 
 export default function OverviewView({ onNavigateTab }) {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [readiness, setReadiness] = useState(null);
   const [radar, setRadar] = useState(null);
   const [progress, setProgress] = useState(null);
@@ -279,9 +279,10 @@ export default function OverviewView({ onNavigateTab }) {
   const streakDays = progress?.streak_days || 0;
   const activeDays = progress?.active_days || 0;
   const academicPct = Math.round(readiness?.academic_index || 0);
+  const dailyHours = user?.daily_hours || readiness?.daily_hours || 2;
 
   return (
-    <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen relative overflow-hidden">
+    <div className="p-6 lg:p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen relative overflow-x-hidden">
       {/* Subtle Ambient Radial Glow */}
       <div className="absolute top-0 left-1/4 w-[600px] h-[350px] bg-[radial-gradient(circle,rgba(0,255,102,0.04)_0%,transparent_70%)] pointer-events-none" />
 
@@ -294,7 +295,7 @@ export default function OverviewView({ onNavigateTab }) {
       )}
 
       {/* 1. Bento Grid Top Row: 4 Modernized KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* KPI 1: Overall Readiness */}
         <div className="panel p-5 rounded-2xl flex flex-col justify-between hover:border-[#00FF66]/40 transition-all duration-300 group">
           <div>
@@ -312,6 +313,9 @@ export default function OverviewView({ onNavigateTab }) {
               </span>
               <span className="text-xs text-[#6B7280] font-mono">composite index</span>
             </div>
+            <div className="text-[10px] font-mono text-[#9CA3AF] mt-2 flex items-center gap-1">
+              <span>Weights: 40% Skills • 35% Exams • 25% Projects ({Math.round(readiness?.evidence_index || 0)}%)</span>
+            </div>
           </div>
           <div className="mt-4">
             <div className="h-2 w-full bg-[#18181D] rounded-full overflow-hidden border border-[#222228]">
@@ -327,8 +331,8 @@ export default function OverviewView({ onNavigateTab }) {
               />
             </div>
             <div className="flex justify-between items-center text-[10px] font-mono text-[#6B7280] mt-1.5">
-              <span>Benchmark Target</span>
-              <span className="text-[#00FF66]">75% Benchmark</span>
+              <span>Target: 75% Benchmark</span>
+              <span className="text-[#00FF66]">100% Total Model</span>
             </div>
           </div>
         </div>
@@ -457,17 +461,17 @@ export default function OverviewView({ onNavigateTab }) {
             {/* Verified Matched Skills */}
             <div>
               <div className="text-[11px] font-mono font-semibold text-[#6B7280] uppercase tracking-wider mb-2 flex items-center justify-between">
-                <span>Verified Matched Skills ({readiness?.matched_skills?.length || 0})</span>
-                <span className="text-[10px] text-[#00FF66]">verified evidence</span>
+                <span>Verified Evidence ({readiness?.matched_skills?.length || 0})</span>
+                <span className="text-[10px] text-emerald-400">verified skills</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {readiness?.matched_skills?.length ? (
                   readiness.matched_skills.map((skill, idx) => (
                     <span
                       key={idx}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-semibold rounded-full bg-[#00FF66]/10 text-[#00FF66] border border-[#00FF66]/30 shadow-[0_0_8px_rgba(0,255,102,0.1)]"
+                      className="bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 font-mono text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5"
                     >
-                      <Check className="w-3.5 h-3.5 text-[#00FF66] shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                       <span>{skill}</span>
                     </span>
                   ))
@@ -477,7 +481,7 @@ export default function OverviewView({ onNavigateTab }) {
               </div>
             </div>
 
-            {/* Target Role Skill Gaps (Pill-styled tags that light up neon green on hover) */}
+            {/* Target Role Skill Gaps */}
             <div>
               <div className="text-[11px] font-mono font-semibold text-[#6B7280] uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span>Target Role Skill Gaps ({readiness?.missing_skills?.length || 0})</span>
@@ -492,14 +496,14 @@ export default function OverviewView({ onNavigateTab }) {
                         key={idx}
                         type="button"
                         onClick={() => handleSkillGapClick(skill)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-semibold rounded-full border transition-all cursor-pointer group ${
+                        className={`font-mono text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all cursor-pointer group ${
                           isTargeted
-                            ? 'bg-[#00FF66]/20 text-[#00FF66] border-[#00FF66] shadow-[0_0_12px_rgba(0,255,102,0.3)]'
-                            : 'bg-[#18181D] hover:bg-[#00FF66]/15 text-[#E4E4E7] hover:text-[#00FF66] border-[#222228] hover:border-[#00FF66]/50 hover:shadow-[0_0_10px_rgba(0,255,102,0.2)]'
+                            ? 'bg-[#00FF66]/20 text-[#00FF66] border border-[#00FF66] shadow-[0_0_12px_rgba(0,255,102,0.3)]'
+                            : 'bg-slate-900/40 border border-dashed border-slate-600 text-slate-300 hover:border-emerald-400 hover:text-emerald-300'
                         }`}
                         title="Click to target this skill for active preparation"
                       >
-                        <Plus className="w-3.5 h-3.5 text-[#6B7280] group-hover:text-[#00FF66] transition-colors shrink-0" />
+                        <Plus className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-400 transition-colors shrink-0" />
                         <span>{skill}</span>
                       </button>
                     );
@@ -538,10 +542,21 @@ export default function OverviewView({ onNavigateTab }) {
               <div className="text-xs text-[#E4E4E7] leading-relaxed p-4 bg-[#18181D] rounded-xl border border-[#222228] border-l-4 border-l-[#00FF66] mb-5 shadow-inner">
                 Candidate demonstrates an overall readiness score of{' '}
                 <strong className="font-mono tabular-nums text-[#00FF66]">{overallScore}%</strong>. Academic standing is rated at{' '}
-                <span className="font-mono tabular-nums text-white font-bold">{academicPct}%</span> with{' '}
-                <span className="font-mono tabular-nums text-white font-bold">{Math.round(readiness?.skill_index || 0)}%</span> role skill alignment.
+                <span className="font-mono tabular-nums text-white font-bold">{academicPct}%</span> (35% weight) with{' '}
+                <span className="font-mono tabular-nums text-white font-bold">{Math.round(readiness?.skill_index || 0)}%</span> role skill alignment (40% weight) and{' '}
+                <span className="font-mono tabular-nums text-white font-bold">{Math.round(readiness?.evidence_index || 0)}%</span> project evidence (25% weight).
                 {readiness?.missing_skills?.length ? (
-                  <> Prioritized development focal areas include <strong className="text-[#00FF66]">{readiness.missing_skills.slice(0, 3).join(', ')}</strong>.</>
+                  <div className="mt-3 pt-2.5 border-t border-[#222228] flex flex-wrap items-center gap-1.5">
+                    <span className="text-[#9CA3AF] text-[11px]">Prioritized focal areas:</span>
+                    {readiness.missing_skills.slice(0, 4).map((skill, idx) => (
+                      <code
+                        key={idx}
+                        className="px-2 py-0.5 rounded bg-slate-900/80 text-emerald-300 font-mono text-[11px] border border-slate-700/80"
+                      >
+                        {skill}
+                      </code>
+                    ))}
+                  </div>
                 ) : null}
               </div>
             </div>
@@ -574,7 +589,7 @@ export default function OverviewView({ onNavigateTab }) {
               <span>Daily Study Commitment & Streak Tracking</span>
             </h4>
             <p className="text-xs text-[#6B7280] mb-3">
-              Adaptive pacing tuned to your registered daily study allocation ({readiness?.daily_hours || 2}h/day).
+              Adaptive pacing tuned to your registered daily study allocation ({dailyHours}h/day).
             </p>
             <div className="flex items-center justify-between gap-3 p-3.5 bg-[#18181D] border border-[#222228] rounded-xl">
               <div className="min-w-0">
