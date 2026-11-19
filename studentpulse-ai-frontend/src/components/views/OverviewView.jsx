@@ -6,11 +6,9 @@ import {
   BookOpen,
   Flame,
   Check,
-  CheckCircle2,
   AlertTriangle,
   ArrowRight,
   RefreshCw,
-  Plus,
   Sparkles,
 } from 'lucide-react';
 import { Chart, registerables } from 'chart.js';
@@ -97,7 +95,7 @@ function RadarChart({ labels, scores }) {
         labels: labels,
         datasets: [
           {
-            label: 'Readiness Score',
+            label: 'Competency Score',
             data: scores,
             backgroundColor: 'rgba(37, 99, 235, 0.12)',
             borderColor: '#2563eb',
@@ -115,10 +113,10 @@ function RadarChart({ labels, scores }) {
         maintainAspectRatio: false,
         layout: {
           padding: {
-            top: 16,
-            bottom: 24, // Generous padding so 'Projects' and 'Consistency' labels are never clipped
-            left: 20,
-            right: 20,
+            top: 10,
+            bottom: 16, // Balanced padding so Projects & Consistency bottom labels are never clipped
+            left: 16,
+            right: 16,
           },
         },
         scales: {
@@ -142,7 +140,7 @@ function RadarChart({ labels, scores }) {
                 weight: '600',
               },
               color: '#475569',
-              padding: 16, // Generous padding to prevent clipping
+              padding: 12, // Keeps labels away from radar perimeter
             },
           },
         },
@@ -173,7 +171,7 @@ function RadarChart({ labels, scores }) {
   }, [labels, scores]);
 
   return (
-    <div className="w-full h-[280px] relative px-2 py-1">
+    <div className="w-full h-[250px] relative px-1 py-1">
       <canvas ref={canvasRef} />
     </div>
   );
@@ -186,7 +184,7 @@ export default function OverviewView({ onNavigateTab }) {
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [addedSkills, setAddedSkills] = useState({});
+  const [targetedSkills, setTargetedSkills] = useState({});
   const [toastMessage, setToastMessage] = useState('');
 
   const loadData = async () => {
@@ -211,12 +209,12 @@ export default function OverviewView({ onNavigateTab }) {
     loadData();
   }, [token]);
 
-  const handleAddSkillToFocus = (skill) => {
-    setAddedSkills((prev) => ({
+  const handleSkillGapClick = (skill) => {
+    setTargetedSkills((prev) => ({
       ...prev,
       [skill]: !prev[skill],
     }));
-    setToastMessage(`"${skill}" ${addedSkills[skill] ? 'removed from' : 'added to'} targeted study focus.`);
+    setToastMessage(`"${skill}" targeted for preparation sprint.`);
     setTimeout(() => setToastMessage(''), 3000);
   };
 
@@ -257,7 +255,7 @@ export default function OverviewView({ onNavigateTab }) {
   const overallScore = Math.round(readiness?.overall_score || 0);
   const tier = readiness?.readiness_tier || 'Developing';
 
-  // Standardized semantic status badges: amber for Needs Foundation
+  // Standardized semantic status badges: amber/orange for Needs Foundation
   const getTierBadge = (t) => {
     if (t === 'Industry Ready') {
       return 'bg-emerald-50 text-emerald-700 border-emerald-200';
@@ -291,7 +289,7 @@ export default function OverviewView({ onNavigateTab }) {
               <span className="text-xs font-medium text-slate-500">
                 Overall Readiness
               </span>
-              <span className={`px-2 py-0.5 text-xs font-semibold rounded-full border whitespace-nowrap ${getTierBadge(tier)}`}>
+              <span className={`px-2 py-0.5 text-xs font-semibold rounded-full border whitespace-nowrap shrink-0 ${getTierBadge(tier)}`}>
                 {tier}
               </span>
             </div>
@@ -416,25 +414,27 @@ export default function OverviewView({ onNavigateTab }) {
         </div>
       </div>
 
-      {/* 2. Main 2-Column Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* Left Column: Competency & Evidence Matrix (with Chart.js radar & interactive skill pills) */}
-        <div className="panel p-5 flex flex-col">
-          <div className="mb-3">
-            <h3 className="text-sm font-bold text-slate-900 m-0">
-              Competency & Evidence Matrix
-            </h3>
-            <p className="text-xs text-slate-500 m-0 mt-0.5">
-              Multi-dimensional readiness breakdown against {readiness?.target_role}
-            </p>
+      {/* 2. Main 2-Column Split: Aligned Bottom Edges & Balanced Heights */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+        {/* Left Column: Competency & Evidence Matrix (flex flex-col justify-between h-full) */}
+        <div className="panel p-5 flex flex-col justify-between h-full">
+          <div>
+            <div className="mb-2">
+              <h3 className="text-sm font-bold text-slate-900 m-0">
+                Competency & Evidence Matrix
+              </h3>
+              <p className="text-xs text-slate-500 m-0 mt-0.5">
+                Multi-dimensional readiness breakdown against {readiness?.target_role}
+              </p>
+            </div>
+
+            {/* Chart.js Radar Canvas with unclipped axis labels */}
+            <div className="flex items-center justify-center my-1">
+              {radar && <RadarChart labels={radar.labels} scores={radar.scores} />}
+            </div>
           </div>
 
-          {/* Chart.js Radar Canvas with unclipped axis labels */}
-          <div className="flex-1 flex items-center justify-center my-2">
-            {radar && <RadarChart labels={radar.labels} scores={radar.scores} />}
-          </div>
-
-          {/* Interactive Skill Pills */}
+          {/* Skill Badges & Gaps */}
           <div className="mt-4 pt-4 border-t border-slate-200 flex flex-col gap-3.5">
             {/* Verified Matched Skills */}
             <div>
@@ -458,34 +458,30 @@ export default function OverviewView({ onNavigateTab }) {
               </div>
             </div>
 
-            {/* Target Role Skill Gaps (Interactive Clickable Pills) */}
+            {/* Target Role Skill Gaps (Red clickable pills with hover elevation & right arrow) */}
             <div>
               <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                 <span>Target Role Skill Gaps ({readiness?.missing_skills?.length || 0})</span>
-                <span className="text-[10px] text-slate-400 lowercase font-normal">click to target</span>
+                <span className="text-[10px] text-slate-400 lowercase font-normal">click to target resource</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {readiness?.missing_skills?.length ? (
                   readiness.missing_skills.map((skill, idx) => {
-                    const isSelected = !!addedSkills[skill];
+                    const isTargeted = !!targetedSkills[skill];
                     return (
                       <button
                         key={idx}
                         type="button"
-                        onClick={() => handleAddSkillToFocus(skill)}
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border transition-all cursor-pointer group shadow-2xs ${
-                          isSelected
-                            ? 'bg-blue-50 text-blue-700 border-blue-300 ring-1 ring-blue-300'
-                            : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300'
+                        onClick={() => handleSkillGapClick(skill)}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border transition-all cursor-pointer group shadow-2xs hover:shadow-xs ${
+                          isTargeted
+                            ? 'bg-red-100 text-red-800 border-red-300 ring-1 ring-red-300'
+                            : 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100/80 hover:border-red-300'
                         }`}
-                        title="Click to add/remove this skill from targeted learning focus"
+                        title="Click to view learning focus and study resources"
                       >
-                        {isSelected ? (
-                          <Check className="w-3 h-3 text-blue-600 shrink-0" />
-                        ) : (
-                          <Plus className="w-3 h-3 text-slate-400 group-hover:text-blue-600 transition-colors shrink-0" />
-                        )}
-                        <span>{skill}</span>
+                        <span className="capitalize">{skill}</span>
+                        <ArrowRight className="w-3 h-3 text-red-400 group-hover:text-red-700 group-hover:translate-x-0.5 transition-all shrink-0" />
                       </button>
                     );
                   })
@@ -497,33 +493,38 @@ export default function OverviewView({ onNavigateTab }) {
           </div>
         </div>
 
-        {/* Right Column: AI Readiness Diagnosis & Next Actions */}
-        <div className="flex flex-col gap-5">
-          <div className="panel p-5">
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 m-0">AI Readiness Diagnosis</h3>
-                <p className="text-xs text-slate-500 m-0 mt-0.5">
-                  Context-aware readiness evaluation for {readiness?.target_role}
-                </p>
+        {/* Right Column: AI Diagnosis + Daily Commitment Stack (flex flex-col justify-between h-full) */}
+        <div className="flex flex-col justify-between gap-5 h-full">
+          {/* AI Readiness Diagnosis Card (flex-1 flex flex-col justify-between) */}
+          <div className="panel p-5 flex flex-col justify-between flex-1">
+            <div>
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 m-0">AI Readiness Diagnosis</h3>
+                  <p className="text-xs text-slate-500 m-0 mt-0.5">
+                    Context-aware readiness evaluation for {readiness?.target_role}
+                  </p>
+                </div>
+                {/* Single-line whitespace-nowrap badge */}
+                <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full border whitespace-nowrap shrink-0 ${getTierBadge(tier)}`}>
+                  {tier}
+                </span>
               </div>
-              <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full border whitespace-nowrap ${getTierBadge(tier)}`}>
-                {tier}
-              </span>
-            </div>
 
-            <div className="text-xs text-slate-600 leading-relaxed p-3.5 bg-slate-50 rounded-lg border border-slate-200 mb-4">
-              Candidate demonstrates an overall readiness score of{' '}
-              <strong className="font-mono tabular-nums text-slate-900">{overallScore}%</strong>. Academic standing is rated at{' '}
-              <span className="font-mono tabular-nums text-slate-900">{academicPct}%</span> with{' '}
-              <span className="font-mono tabular-nums text-slate-900">{Math.round(readiness?.skill_index || 0)}%</span> role skill alignment.
-              {readiness?.missing_skills?.length ? (
-                <> Key focal gaps include <strong className="text-slate-800">{readiness.missing_skills.slice(0, 3).join(', ')}</strong>.</>
-              ) : null}
+              {/* Diagnosis Box with Amber Left Accent Border */}
+              <div className="text-xs text-slate-700 leading-relaxed p-3.5 bg-amber-50/40 rounded-r-lg border-y border-r border-amber-200/50 border-l-4 border-amber-400 mb-4">
+                Candidate demonstrates an overall readiness score of{' '}
+                <strong className="font-mono tabular-nums text-slate-900">{overallScore}%</strong>. Academic standing is rated at{' '}
+                <span className="font-mono tabular-nums text-slate-900">{academicPct}%</span> with{' '}
+                <span className="font-mono tabular-nums text-slate-900">{Math.round(readiness?.skill_index || 0)}%</span> role skill alignment.
+                {readiness?.missing_skills?.length ? (
+                  <> Key focal gaps include <strong className="text-slate-800">{readiness.missing_skills.slice(0, 3).join(', ')}</strong>.</>
+                ) : null}
+              </div>
             </div>
 
             {/* Clear CTA Hierarchy */}
-            <div className="flex flex-col gap-2 mt-4">
+            <div className="flex flex-col gap-2 mt-4 pt-2">
               {/* Primary Prominent Solid Dark Button */}
               <button
                 type="button"
@@ -534,14 +535,14 @@ export default function OverviewView({ onNavigateTab }) {
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
-              {/* Secondary Clean Ghost Button / Subtle Inline Link */}
+              {/* Softer Subtle Secondary Button */}
               <button
                 type="button"
                 onClick={() => onNavigateTab('evidence')}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors py-1.5 px-2 rounded-md hover:bg-slate-100 cursor-pointer w-fit mt-1"
+                className="w-full py-2 px-3 bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 transition-colors rounded-lg font-medium text-xs flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
               >
-                <span>+ Add assessments, projects & certifications</span>
-                <ArrowRight className="w-3 h-3" />
+                <span>+ Add Assessments, Projects & Certifications</span>
+                <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
               </button>
             </div>
           </div>
@@ -554,12 +555,13 @@ export default function OverviewView({ onNavigateTab }) {
             <p className="text-xs text-slate-500 mb-3">
               Action plans and milestone deadlines adapt dynamically to your daily available study allocation.
             </p>
-            <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg">
-              <div>
-                <div className="text-xs font-semibold text-slate-900">Active Streak Target</div>
-                <div className="text-[11px] text-slate-500">Log task completions daily to build placement momentum</div>
+            <div className="flex items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+              <div className="min-w-0">
+                <div className="text-xs font-semibold text-slate-900 truncate">Active Streak Target</div>
+                <div className="text-[11px] text-slate-500 truncate">Log task completions daily to build placement momentum</div>
               </div>
-              <span className="px-2.5 py-1 text-xs font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200 font-mono tabular-nums whitespace-nowrap">
+              {/* Single-line whitespace-nowrap streak pill */}
+              <span className="px-2.5 py-1 text-xs font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200 font-mono tabular-nums whitespace-nowrap shrink-0">
                 {streakDays} Day Streak 🔥
               </span>
             </div>
