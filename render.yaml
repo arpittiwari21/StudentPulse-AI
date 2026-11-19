@@ -3,7 +3,7 @@ services:
     name: studentpulse-ai
     runtime: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:app
+    startCommand: gunicorn --chdir backend app:app
     plan: free
     envVars:
       - key: PYTHON_VERSION
