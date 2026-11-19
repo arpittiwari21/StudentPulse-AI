@@ -15,12 +15,11 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
-  Clock,
   Calendar,
-  AlertCircle,
   HelpCircle,
   RefreshCw,
   X,
+  Zap,
 } from 'lucide-react';
 
 export default function ActionPlanView() {
@@ -64,8 +63,7 @@ export default function ActionPlanView() {
     setGenerating(true);
     setError(null);
     try {
-      const res = await generateAiPlan(token);
-      // Reload active plan from DB
+      await generateAiPlan(token);
       await loadPlan();
     } catch (err) {
       setError(err.message || 'Failed to generate AI action plan.');
@@ -139,9 +137,9 @@ export default function ActionPlanView() {
 
   if (loading) {
     return (
-      <div style={{ padding: '24px' }}>
-        <div className="panel skeleton" style={{ height: '140px', marginBottom: '24px' }} />
-        <div className="panel skeleton" style={{ height: '380px' }} />
+      <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen">
+        <div className="panel skeleton h-[160px] rounded-2xl" />
+        <div className="panel skeleton h-[420px] rounded-2xl" />
       </div>
     );
   }
@@ -149,23 +147,26 @@ export default function ActionPlanView() {
   const interviewQuestions = plan?.interview_questions || [];
 
   return (
-    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen">
       {/* Top Action Bar */}
-      <div className="panel" style={{ padding: '20px 24px', backgroundColor: '#ffffff' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+      <div className="panel p-6 rounded-2xl border-t-2 border-t-[#00FF66] bg-[#111114]">
+        <div className="flex justify-between items-center flex-wrap gap-4">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-              <h3 style={{ fontSize: '15px', fontWeight: 700, margin: 0 }}>AI-Generated Preparation Roadmap</h3>
+            <div className="flex items-center gap-2.5 mb-1">
+              <span className="w-2 h-2 rounded-full bg-[#00FF66] shadow-[0_0_8px_#00FF66]" />
+              <h3 className="text-base font-bold text-white tracking-tight m-0">
+                AI Adaptive Milestone Roadmap
+              </h3>
               {plan?.readiness_tier && (
-                <span className={`pill ${plan.readiness_tier === 'Industry Ready' ? 'pill-ready' : 'pill-developing'}`}>
+                <span className="px-2.5 py-0.5 text-xs font-mono font-bold rounded-full bg-[#00FF66]/10 text-[#00FF66] border border-[#00FF66]/30">
                   {plan.readiness_tier}
                 </span>
               )}
             </div>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
+            <p className="text-xs text-[#9CA3AF] m-0">
               {plan
-                ? `Plan generated on ${new Date(plan.generated_at).toLocaleDateString()} • Tailored to your target role & daily study hours`
-                : 'No active plan found. Click generate to construct a 4-milestone plan.'}
+                ? `Generated on ${new Date(plan.generated_at).toLocaleDateString()} • Context-tuned to your daily study pacing`
+                : 'No active plan. Click to generate a tailored 4-milestone roadmap.'}
             </p>
           </div>
 
@@ -174,65 +175,55 @@ export default function ActionPlanView() {
             className="btn-primary"
             onClick={handleGeneratePlan}
             disabled={generating}
-            style={{ padding: '9px 16px' }}
           >
             {generating ? (
               <>
-                <RefreshCw size={14} className="spinner" />
-                <span>Running Gemini / Fallback Engine...</span>
+                <RefreshCw size={14} className="animate-spin" />
+                <span>Running Gemini Engine...</span>
               </>
             ) : (
               <>
                 <Sparkles size={14} />
-                <span>{plan ? 'Regenerate AI Plan' : 'Generate AI Action Plan'}</span>
+                <span>{plan ? 'Regenerate AI Action Plan' : 'Generate AI Action Plan'}</span>
               </>
             )}
           </button>
         </div>
 
         {plan?.diagnosis && (
-          <div
-            style={{
-              marginTop: '16px',
-              padding: '12px 14px',
-              backgroundColor: 'var(--bg-subtle)',
-              border: '1px solid var(--border-default)',
-              borderRadius: '6px',
-              fontSize: '13px',
-              color: 'var(--text-secondary)',
-              lineHeight: 1.5,
-            }}
-          >
-            <strong style={{ color: 'var(--text-primary)' }}>AI Readiness Diagnosis: </strong>
+          <div className="mt-4 p-4 bg-[#18181D] border border-[#222228] border-l-4 border-l-[#00FF66] rounded-xl text-xs text-[#E4E4E7] leading-relaxed">
+            <strong className="text-[#00FF66] font-mono">AI Diagnosis: </strong>
             {plan.diagnosis}
           </div>
         )}
       </div>
 
       {error && (
-        <div style={{ padding: '12px 16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '13px' }}>
+        <div className="p-4 bg-[#18181D] border border-red-500/30 rounded-xl text-red-400 text-xs">
           {error}
         </div>
       )}
 
       {/* 4-Milestone Sprint Roadmap */}
-      <div className="panel" style={{ padding: '20px', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div className="panel p-6 rounded-2xl">
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>4-Milestone Sprint Roadmap</h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
-              Check off tasks, add custom milestones, and adjust target dates
+            <h3 className="text-base font-bold text-white tracking-tight m-0">
+              4-Milestone Sprint Roadmap
+            </h3>
+            <p className="text-xs text-[#9CA3AF] m-0 mt-0.5">
+              Check off tasks, add custom milestones, and adjust completion target dates
             </p>
           </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <span className="font-mono tabular-nums">
-              {tasks.filter((t) => t.completed).length} of {tasks.length}
+          <div className="text-xs font-mono text-[#9CA3AF] bg-[#18181D] px-3 py-1.5 rounded-lg border border-[#222228]">
+            <span className="text-[#00FF66] font-bold">
+              {tasks.filter((t) => t.completed).length}
             </span>{' '}
-            tasks completed
+            / {tasks.length} tasks completed
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className="flex flex-col gap-5">
           {[1, 2, 3, 4].map((mNum) => {
             const milestoneTasks = tasks.filter((t) => t.milestone === mNum);
             const mTitles = {
@@ -245,52 +236,23 @@ export default function ActionPlanView() {
             return (
               <div
                 key={mNum}
-                style={{
-                  border: '1px solid var(--border-default)',
-                  borderRadius: '6px',
-                  backgroundColor: '#ffffff',
-                  overflow: 'hidden',
-                }}
+                className="border border-[#222228] rounded-xl bg-[#0C0C0F] overflow-hidden"
               >
                 {/* Milestone Bar */}
-                <div
-                  style={{
-                    padding: '12px 16px',
-                    backgroundColor: 'var(--bg-subtle)',
-                    borderBottom: '1px solid var(--border-default)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div
-                      style={{
-                        width: '22px',
-                        height: '22px',
-                        borderRadius: '9999px',
-                        backgroundColor: '#18181b',
-                        color: '#ffffff',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontFamily: 'var(--font-mono)',
-                      }}
-                    >
+                <div className="p-4 bg-[#111114] border-b border-[#222228] flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-[#18181D] border border-[#00FF66]/30 text-[#00FF66] text-xs font-mono font-bold flex items-center justify-center">
                       {mNum}
                     </div>
-                    <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                    <span className="text-xs font-bold text-white tracking-tight">
                       {mTitles[mNum]}
                     </span>
                   </div>
 
                   <button
                     type="button"
-                    className="btn-secondary"
+                    className="btn-secondary text-[11px] py-1.5 px-3"
                     onClick={() => handleOpenAddTask(mNum)}
-                    style={{ fontSize: '11px', padding: '4px 8px' }}
                   >
                     <Plus size={12} />
                     <span>Add Task</span>
@@ -299,83 +261,71 @@ export default function ActionPlanView() {
 
                 {/* Tasks List */}
                 {milestoneTasks.length === 0 ? (
-                  <div style={{ padding: '16px', fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center' }}>
-                    No tasks yet for Milestone {mNum}. Click &quot;Add Task&quot; above to create one.
+                  <div className="p-4 text-xs text-[#6B7280] text-center font-mono">
+                    No tasks for Milestone {mNum}. Click &quot;Add Task&quot; above to append one.
                   </div>
                 ) : (
-                  <div style={{ divideY: '1px solid var(--border-subtle)' }}>
+                  <div className="divide-y divide-[#18181D]">
                     {milestoneTasks.map((task) => {
                       const isDone = !!task.completed;
                       const prioClass =
                         task.priority === 'High'
-                          ? 'pill-gap'
+                          ? 'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/30'
                           : task.priority === 'Medium'
-                          ? 'pill-developing'
-                          : 'pill-neutral';
+                          ? 'bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/30'
+                          : 'bg-[#6B7280]/10 text-[#9CA3AF] border-[#6B7280]/30';
 
                       return (
                         <div
                           key={task.id}
-                          style={{
-                            padding: '12px 16px',
-                            display: 'flex',
-                            alignItems: 'flex-start',
-                            justifyContent: 'space-between',
-                            gap: '12px',
-                            borderBottom: '1px solid var(--border-subtle)',
-                            backgroundColor: isDone ? '#fafafa' : '#ffffff',
-                          }}
+                          className={`p-4 flex items-start justify-between gap-3 transition-colors ${
+                            isDone ? 'bg-[#09090B]/60' : 'hover:bg-[#111114]/40'
+                          }`}
                         >
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flex: 1, minWidth: 0 }}>
+                          <div className="flex items-start gap-3 flex-1 min-w-0">
                             <button
                               type="button"
                               onClick={() => handleToggleTask(task.id, isDone)}
-                              style={{
-                                background: 'none',
-                                border: 'none',
-                                padding: 0,
-                                cursor: 'pointer',
-                                color: isDone ? '#059669' : '#a1a1aa',
-                                marginTop: '2px',
-                              }}
+                              className="p-0 bg-transparent border-0 cursor-pointer text-[#6B7280] hover:text-[#00FF66] mt-0.5 shrink-0"
                             >
-                              {isDone ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                              {isDone ? (
+                                <CheckCircle2 size={18} className="text-[#00FF66] drop-shadow-[0_0_6px_rgba(0,255,102,0.5)]" />
+                              ) : (
+                                <Circle size={18} />
+                              )}
                             </button>
 
-                            <div style={{ minWidth: 0, flex: 1 }}>
+                            <div className="min-w-0 flex-1">
                               <div
-                                style={{
-                                  fontSize: '13px',
-                                  fontWeight: 500,
-                                  color: isDone ? 'var(--text-muted)' : 'var(--text-primary)',
-                                  textDecoration: isDone ? 'line-through' : 'none',
-                                }}
+                                className={`text-xs font-semibold ${
+                                  isDone ? 'line-through text-[#6B7280]' : 'text-white'
+                                }`}
                               >
                                 {task.title}
                               </div>
                               {task.description && (
-                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px', lineHeight: 1.4 }}>
+                                <div className="text-[11px] text-[#9CA3AF] mt-1 line-clamp-2">
                                   {task.description}
                                 </div>
                               )}
                             </div>
                           </div>
 
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-                            <span className={`pill ${prioClass}`}>{task.priority}</span>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded-md border ${prioClass}`}>
+                              {task.priority}
+                            </span>
                             {task.target_date && (
-                              <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                                <Calendar size={11} />
-                                <span className="font-mono tabular-nums">{task.target_date}</span>
+                              <span className="text-[11px] text-[#9CA3AF] flex items-center gap-1 font-mono">
+                                <Calendar size={11} className="text-[#6B7280]" />
+                                <span>{task.target_date}</span>
                               </span>
                             )}
                             <button
                               type="button"
                               onClick={() => handleDeleteTask(task.id)}
-                              style={{ background: 'none', border: 'none', color: '#a1a1aa', padding: '4px', cursor: 'pointer' }}
+                              className="p-1 text-[#6B7280] hover:text-[#EF4444] rounded transition-colors"
                               title="Delete task"
-                              onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-                              onMouseLeave={(e) => (e.currentTarget.style.color = '#a1a1aa')}
                             >
                               <Trash2 size={13} />
                             </button>
@@ -392,82 +342,60 @@ export default function ActionPlanView() {
       </div>
 
       {/* Mock Interview Q&A Flashcards Section */}
-      <div className="panel" style={{ padding: '20px' }}>
-        <div style={{ marginBottom: '16px' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>
+      <div className="panel p-6 rounded-2xl">
+        <div className="mb-5">
+          <h3 className="text-base font-bold text-white tracking-tight m-0">
             Project & Skill Mock Interview Flashcards
           </h3>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
-            Tailored questions generated from your projects and identified skill gaps using the STAR framework
+          <p className="text-xs text-[#9CA3AF] m-0 mt-0.5">
+            Tailored technical interview questions generated from your projects and identified skill gaps
           </p>
         </div>
 
         {interviewQuestions.length === 0 ? (
-          <div style={{ padding: '30px 20px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-            No interview questions generated yet. Click &quot;Generate AI Plan&quot; above to produce context-aware questions.
+          <div className="p-8 text-center text-[#6B7280] text-xs font-mono">
+            No interview questions generated yet. Click &quot;Generate AI Plan&quot; above to synthesize custom questions.
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="flex flex-col gap-3">
             {interviewQuestions.map((q, idx) => {
               const isExpanded = activeQuestion === idx;
               return (
                 <div
                   key={idx}
-                  style={{
-                    border: '1px solid var(--border-default)',
-                    borderRadius: '6px',
-                    overflow: 'hidden',
-                    backgroundColor: '#ffffff',
-                  }}
+                  className="border border-[#222228] rounded-xl overflow-hidden bg-[#0C0C0F]"
                 >
                   <button
                     type="button"
                     onClick={() => setActiveQuestion(isExpanded ? null : idx)}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      background: 'none',
-                      border: 'none',
-                      textAlign: 'left',
-                      cursor: 'pointer',
-                      gap: '12px',
-                    }}
+                    className="w-full p-4 flex items-center justify-between text-left cursor-pointer gap-3 hover:bg-[#111114] transition-colors"
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                      <HelpCircle size={15} style={{ color: '#2563eb', marginTop: '2px', flexShrink: 0 }} />
+                    <div className="flex items-start gap-3">
+                      <HelpCircle size={16} className="text-[#00FF66] mt-0.5 shrink-0" />
                       <div>
-                        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                        <div className="text-xs font-bold text-white">
                           {q.question}
                         </div>
                         {q.focus_area && (
-                          <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
-                            Focus: <span className="font-mono">{q.focus_area}</span>
-                            {q.project_title && ` • Linked Project: ${q.project_title}`}
+                          <div className="text-[11px] text-[#9CA3AF] font-mono mt-1">
+                            Focus: <span className="text-[#00FF66]">{q.focus_area}</span>
+                            {q.project_title && ` • Project: ${q.project_title}`}
                           </div>
                         )}
                       </div>
                     </div>
-                    {isExpanded ? <ChevronUp size={16} color="var(--text-muted)" /> : <ChevronDown size={16} color="var(--text-muted)" />}
+                    {isExpanded ? <ChevronUp size={16} className="text-[#9CA3AF]" /> : <ChevronDown size={16} className="text-[#9CA3AF]" />}
                   </button>
 
                   {isExpanded && (
-                    <div
-                      style={{
-                        padding: '14px 16px',
-                        backgroundColor: 'var(--bg-subtle)',
-                        borderTop: '1px solid var(--border-default)',
-                        fontSize: '13px',
-                        lineHeight: 1.6,
-                        color: 'var(--text-secondary)',
-                      }}
-                    >
-                      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
-                        Model STAR Response Breakdown:
+                    <div className="p-4 bg-[#111114] border-t border-[#222228] text-xs leading-relaxed text-[#E4E4E7]">
+                      <div className="text-[10px] font-mono font-bold text-[#00FF66] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                        <Zap size={11} />
+                        <span>Recommended STAR Answer Strategy:</span>
                       </div>
-                      <p style={{ margin: 0 }}>{q.sample_answer || q.answer || 'Provide a structured answer citing Situation, Task, Action, and Result.'}</p>
+                      <p className="m-0 text-slate-300">
+                        {q.sample_answer || q.answer || 'Provide a structured response covering Situation, Task, Action, and Measurable Result.'}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -481,58 +409,57 @@ export default function ActionPlanView() {
       {showTaskModal && (
         <div className="modal-overlay" onClick={() => setShowTaskModal(false)}>
           <div
-            className="panel"
-            style={{ width: '100%', maxWidth: '440px', padding: '24px', backgroundColor: '#ffffff' }}
+            className="panel p-6 w-full max-w-md bg-[#111114] border border-[#222228] rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-base font-bold text-white m-0">
                 Add Custom Task (Milestone {selectedMilestone})
               </h3>
               <button
                 type="button"
                 onClick={() => setShowTaskModal(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', padding: '4px' }}
+                className="p-1 text-[#9CA3AF] hover:text-white"
               >
                 <X size={16} />
               </button>
             </div>
 
             {taskError && (
-              <div style={{ padding: '8px 12px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '12px', marginBottom: '14px' }}>
+              <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs mb-4">
                 {taskError}
               </div>
             )}
 
             <form onSubmit={handleSaveCustomTask}>
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+              <div className="mb-3.5">
+                <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                   Task Title
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Implement JWT authentication with refresh token"
+                  placeholder="e.g. Implement JWT refresh token rotation"
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
                   required
                 />
               </div>
 
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
-                  Description / Study Link
+              <div className="mb-3.5">
+                <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
+                  Description / Study Material
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Details, documentation links, or exercises"
+                  placeholder="Notes, architecture links, or references"
                   value={taskDesc}
                   onChange={(e) => setTaskDesc(e.target.value)}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+              <div className="grid grid-cols-2 gap-3 mb-5">
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                  <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                     Priority
                   </label>
                   <select
@@ -545,7 +472,7 @@ export default function ActionPlanView() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                  <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                     Target Completion
                   </label>
                   <select
@@ -560,7 +487,7 @@ export default function ActionPlanView() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <div className="flex justify-end gap-3 mt-5">
                 <button
                   type="button"
                   className="btn-secondary"
@@ -570,7 +497,7 @@ export default function ActionPlanView() {
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary" disabled={savingTask}>
-                  {savingTask ? 'Adding...' : 'Save Task'}
+                  {savingTask ? 'Saving...' : 'Save Task'}
                 </button>
               </div>
             </form>

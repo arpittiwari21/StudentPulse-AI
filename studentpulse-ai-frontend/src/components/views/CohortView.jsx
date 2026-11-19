@@ -5,11 +5,8 @@ import {
   Users,
   Download,
   Search,
-  Filter,
-  CheckCircle2,
-  AlertTriangle,
   RefreshCw,
-  GraduationCap,
+  Sparkles,
 } from 'lucide-react';
 
 export default function CohortView() {
@@ -54,13 +51,13 @@ export default function CohortView() {
 
   if (loading) {
     return (
-      <div style={{ padding: '24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="panel skeleton" style={{ height: '90px' }} />
+            <div key={i} className="panel skeleton h-[120px] rounded-2xl" />
           ))}
         </div>
-        <div className="panel skeleton" style={{ height: '400px' }} />
+        <div className="panel skeleton h-[420px] rounded-2xl" />
       </div>
     );
   }
@@ -84,87 +81,77 @@ export default function CohortView() {
   const tierCounts = cohortData?.tier_distribution || {};
 
   return (
-    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen">
       {/* KPI Cards Strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
-        <div className="panel" style={{ padding: '16px 20px' }}>
-          <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)', marginBottom: '6px' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="panel p-5 rounded-2xl flex flex-col justify-between hover:border-[#00FF66]/40 transition-all">
+          <div className="text-xs font-mono font-semibold uppercase tracking-wider text-[#9CA3AF] mb-1">
             Total Cohort Candidates
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }} className="tabular-nums">
+          <div className="text-3xl font-extrabold text-white font-mono tabular-nums">
             {cohortData?.total_students || 0}
           </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            MCA AI & Python Programming
+          <div className="text-xs text-[#6B7280] font-mono mt-1">
+            KIET MCA AI & Python Program
           </div>
         </div>
 
-        <div className="panel" style={{ padding: '16px 20px' }}>
-          <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)', marginBottom: '6px' }}>
+        <div className="panel p-5 rounded-2xl flex flex-col justify-between hover:border-[#00FF66]/40 transition-all">
+          <div className="text-xs font-mono font-semibold uppercase tracking-wider text-[#9CA3AF] mb-1">
             Cohort Average Readiness
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }} className="tabular-nums">
+          <div className="text-3xl font-extrabold text-[#00FF66] font-mono tabular-nums drop-shadow-[0_0_8px_rgba(0,255,102,0.3)]">
             {Math.round(cohortData?.average_readiness || 0)}%
           </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            Across all active student submissions
+          <div className="text-xs text-[#6B7280] font-mono mt-1">
+            Across active evaluated students
           </div>
         </div>
 
-        <div className="panel" style={{ padding: '16px 20px' }}>
-          <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)', marginBottom: '6px' }}>
+        <div className="panel p-5 rounded-2xl flex flex-col justify-between hover:border-[#00FF66]/40 transition-all">
+          <div className="text-xs font-mono font-semibold uppercase tracking-wider text-[#9CA3AF] mb-1">
             Readiness Tier Distribution
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
-            <span className="pill pill-ready font-mono tabular-nums">
+          <div className="flex flex-wrap gap-2 mt-2">
+            <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-[#00FF66]/10 text-[#00FF66] border border-[#00FF66]/30">
               Ready: {tierCounts['Industry Ready'] || 0}
             </span>
-            <span className="pill pill-developing font-mono tabular-nums">
-              Developing: {tierCounts['Developing'] || 0}
+            <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/30">
+              Dev: {tierCounts['Developing'] || 0}
             </span>
-            <span className="pill pill-gap font-mono tabular-nums">
-              Gaps: {tierCounts['Needs Foundation'] || 0}
+            <span className="px-2.5 py-1 text-xs font-mono font-bold rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30">
+              Gap: {tierCounts['Needs Foundation'] || 0}
             </span>
           </div>
         </div>
       </div>
 
       {error && (
-        <div style={{ padding: '12px 16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '13px' }}>
+        <div className="p-4 bg-[#18181D] border border-red-500/30 rounded-xl text-red-400 text-xs">
           {error}
         </div>
       )}
 
       {/* Cohort Table & Controls */}
-      <div className="panel" style={{ overflow: 'hidden' }}>
+      <div className="panel overflow-hidden rounded-2xl">
         {/* Controls Toolbar */}
-        <div
-          style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid var(--border-default)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: '12px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            <div style={{ position: 'relative', width: '220px' }}>
-              <Search size={14} style={{ position: 'absolute', left: '10px', top: '9px', color: '#a1a1aa' }} />
+        <div className="p-5 border-b border-[#222228] flex justify-between items-center flex-wrap gap-4 bg-[#0C0C0F]">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="relative w-56">
+              <Search size={14} className="absolute left-3 top-3 text-[#6B7280]" />
               <input
                 type="text"
                 placeholder="Search candidates..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ paddingLeft: '30px', fontSize: '12px', height: '32px' }}
+                className="pl-8 text-xs h-9 bg-[#111114] border-[#222228]"
               />
             </div>
 
             <select
               value={tierFilter}
               onChange={(e) => setTierFilter(e.target.value)}
-              style={{ fontSize: '12px', height: '32px', width: 'auto', padding: '4px 10px' }}
+              className="text-xs h-9 w-auto px-3 bg-[#111114] border-[#222228]"
             >
               <option value="ALL">All Readiness Tiers</option>
               <option value="Industry Ready">Industry Ready</option>
@@ -175,7 +162,7 @@ export default function CohortView() {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              style={{ fontSize: '12px', height: '32px', width: 'auto', padding: '4px 10px' }}
+              className="text-xs h-9 w-auto px-3 bg-[#111114] border-[#222228]"
             >
               <option value="ALL">All Target Roles</option>
               <option value="Full-Stack Developer">Full-Stack Developer</option>
@@ -185,22 +172,20 @@ export default function CohortView() {
             </select>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="flex gap-2.5">
             <button
               type="button"
-              className="btn-secondary"
+              className="btn-secondary h-9 px-3"
               onClick={loadCohort}
-              title="Refresh roster"
-              style={{ padding: '6px 10px' }}
+              title="Refresh roster telemetry"
             >
               <RefreshCw size={13} />
             </button>
             <button
               type="button"
-              className="btn-primary"
+              className="btn-primary h-9 px-4 text-xs font-bold"
               onClick={handleExportCsv}
               disabled={downloading}
-              style={{ padding: '6px 12px' }}
             >
               <Download size={13} />
               <span>{downloading ? 'Exporting...' : 'Export Cohort CSV'}</span>
@@ -209,7 +194,7 @@ export default function CohortView() {
         </div>
 
         {/* Student Roster Table */}
-        <div style={{ overflowX: 'auto' }}>
+        <div className="overflow-x-auto">
           <table className="data-table">
             <thead>
               <tr>
@@ -219,14 +204,14 @@ export default function CohortView() {
                 <th>Readiness Score</th>
                 <th>Academic Avg</th>
                 <th>Skill Alignment</th>
-                <th>Status</th>
+                <th>Tier</th>
               </tr>
             </thead>
             <tbody>
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
-                    No students match the current filters.
+                  <td colSpan={7} className="text-center py-10 text-[#6B7280] font-mono">
+                    No candidates matched query filters.
                   </td>
                 </tr>
               ) : (
@@ -239,35 +224,34 @@ export default function CohortView() {
                   return (
                     <tr key={s.user_id}>
                       <td>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{s.name}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{s.email}</div>
+                        <div className="font-semibold text-white">{s.name}</div>
+                        <div className="text-[11px] text-[#9CA3AF] font-mono">{s.email}</div>
                       </td>
-                      <td className="font-mono tabular-nums" style={{ fontSize: '12px' }}>
+                      <td className="font-mono tabular-nums text-white text-xs">
                         {s.enrollment_no || 'N/A'}
                       </td>
-                      <td style={{ color: 'var(--text-secondary)' }}>
+                      <td className="text-[#9CA3AF]">
                         {s.target_role || 'Full-Stack Developer'}
                       </td>
                       <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span className="font-mono tabular-nums" style={{ fontWeight: 600, width: '32px' }}>
+                        <div className="flex items-center gap-2.5">
+                          <span className="font-mono tabular-nums font-bold text-white w-8 text-xs">
                             {score}%
                           </span>
-                          <div style={{ width: '80px', height: '4px', backgroundColor: '#f4f4f5', borderRadius: '2px', overflow: 'hidden' }}>
+                          <div className="w-20 h-1.5 bg-[#18181D] rounded-full overflow-hidden border border-[#222228]">
                             <div
-                              style={{
-                                width: `${score}%`,
-                                height: '100%',
-                                backgroundColor: score >= 75 ? '#059669' : score >= 50 ? '#2563eb' : '#dc2626',
-                              }}
+                              className={`h-full rounded-full ${
+                                score >= 75 ? 'bg-[#00FF66]' : score >= 50 ? 'bg-[#60A5FA]' : 'bg-[#F59E0B]'
+                              }`}
+                              style={{ width: `${score}%` }}
                             />
                           </div>
                         </div>
                       </td>
-                      <td className="font-mono tabular-nums">
+                      <td className="font-mono tabular-nums text-white text-xs">
                         {Math.round(s.academic_index || 0)}%
                       </td>
-                      <td className="font-mono tabular-nums">
+                      <td className="font-mono tabular-nums text-white text-xs">
                         {Math.round(s.skill_index || 0)}%
                       </td>
                       <td>

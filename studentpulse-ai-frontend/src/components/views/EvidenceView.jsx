@@ -20,7 +20,7 @@ import {
   Award,
   X,
   AlertCircle,
-  CheckCircle,
+  Check,
 } from 'lucide-react';
 
 export default function EvidenceView() {
@@ -163,56 +163,44 @@ export default function EvidenceView() {
   };
 
   return (
-    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen">
       {/* Sub-navigation & Header Controls */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ display: 'inline-flex', padding: '3px', backgroundColor: 'var(--bg-subtle)', borderRadius: '8px', border: '1px solid var(--border-default)' }}>
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <div className="inline-flex p-1 bg-[#111114] rounded-xl border border-[#222228]">
           <button
             type="button"
             onClick={() => setActiveSection('assessments')}
-            style={{
-              padding: '6px 14px',
-              fontSize: '12px',
-              fontWeight: activeSection === 'assessments' ? 600 : 500,
-              color: activeSection === 'assessments' ? 'var(--text-primary)' : 'var(--text-secondary)',
-              backgroundColor: activeSection === 'assessments' ? '#ffffff' : 'transparent',
-              borderRadius: '6px',
-              border: activeSection === 'assessments' ? '1px solid var(--border-default)' : '1px solid transparent',
-            }}
+            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              activeSection === 'assessments'
+                ? 'bg-[#18181D] text-[#00FF66] border border-[#00FF66]/30 shadow-[0_0_10px_rgba(0,255,102,0.15)]'
+                : 'text-[#9CA3AF] hover:text-white'
+            }`}
           >
-            <BookOpen size={13} />
+            <BookOpen className="w-3.5 h-3.5 inline mr-1.5" />
             <span>Academic Scores ({assessments.length})</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveSection('projects')}
-            style={{
-              padding: '6px 14px',
-              fontSize: '12px',
-              fontWeight: activeSection === 'projects' ? 600 : 500,
-              color: activeSection === 'projects' ? 'var(--text-primary)' : 'var(--text-secondary)',
-              backgroundColor: activeSection === 'projects' ? '#ffffff' : 'transparent',
-              borderRadius: '6px',
-              border: activeSection === 'projects' ? '1px solid var(--border-default)' : '1px solid transparent',
-            }}
+            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              activeSection === 'projects'
+                ? 'bg-[#18181D] text-[#00FF66] border border-[#00FF66]/30 shadow-[0_0_10px_rgba(0,255,102,0.15)]'
+                : 'text-[#9CA3AF] hover:text-white'
+            }`}
           >
-            <FolderGit2 size={13} />
+            <FolderGit2 className="w-3.5 h-3.5 inline mr-1.5" />
             <span>Project Repositories ({projects.length})</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveSection('certifications')}
-            style={{
-              padding: '6px 14px',
-              fontSize: '12px',
-              fontWeight: activeSection === 'certifications' ? 600 : 500,
-              color: activeSection === 'certifications' ? 'var(--text-primary)' : 'var(--text-secondary)',
-              backgroundColor: activeSection === 'certifications' ? '#ffffff' : 'transparent',
-              borderRadius: '6px',
-              border: activeSection === 'certifications' ? '1px solid var(--border-default)' : '1px solid transparent',
-            }}
+            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+              activeSection === 'certifications'
+                ? 'bg-[#18181D] text-[#00FF66] border border-[#00FF66]/30 shadow-[0_0_10px_rgba(0,255,102,0.15)]'
+                : 'text-[#9CA3AF] hover:text-white'
+            }`}
           >
-            <Award size={13} />
+            <Award className="w-3.5 h-3.5 inline mr-1.5" />
             <span>Certifications ({certifications.length})</span>
           </button>
         </div>
@@ -222,41 +210,41 @@ export default function EvidenceView() {
           className="btn-primary"
           onClick={() => openModal(activeSection === 'assessments' ? 'assessment' : activeSection === 'projects' ? 'project' : 'certification')}
         >
-          <Plus size={14} />
+          <Plus className="w-4 h-4" />
           <span>
-            {activeSection === 'assessments' && 'Add Assessment'}
-            {activeSection === 'projects' && 'Add Project'}
+            {activeSection === 'assessments' && 'Add Academic Assessment'}
+            {activeSection === 'projects' && 'Add Project Repository'}
             {activeSection === 'certifications' && 'Add Certification'}
           </span>
         </button>
       </div>
 
       {error && (
-        <div style={{ padding: '12px 16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '13px' }}>
+        <div className="p-4 bg-[#18181D] border border-red-500/30 rounded-xl text-red-400 text-xs">
           {error}
         </div>
       )}
 
       {/* Section 1: Academic Assessments */}
       {activeSection === 'assessments' && (
-        <div className="panel" style={{ overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-default)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="panel overflow-hidden rounded-2xl">
+          <div className="p-5 border-b border-[#222228] flex justify-between items-center bg-[#0C0C0F]">
             <div>
-              <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Academic Assessments</h3>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+              <h3 className="text-sm font-bold text-white m-0">Academic Assessments</h3>
+              <p className="text-xs text-[#9CA3AF] m-0 mt-0.5">
                 Coursework and examination performance factored into the 35% Academic Index
               </p>
             </div>
           </div>
 
           {assessments.length === 0 ? (
-            <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <BookOpen size={28} style={{ margin: '0 auto 8px auto', opacity: 0.5 }} />
-              <div style={{ fontSize: '13px', fontWeight: 500 }}>No academic assessments logged yet</div>
-              <p style={{ fontSize: '12px', marginTop: '4px' }}>Add scores for Data Structures, Python, DBMS, or OS to establish your academic index.</p>
+            <div className="p-12 text-center text-[#6B7280]">
+              <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#00FF66]" />
+              <div className="text-xs font-semibold text-white">No academic assessments logged yet</div>
+              <p className="text-xs mt-1 text-[#6B7280]">Add scores for Data Structures, Python, DBMS, or OS to establish your academic index.</p>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
+            <div className="overflow-x-auto">
               <table className="data-table">
                 <thead>
                   <tr>
@@ -266,7 +254,7 @@ export default function EvidenceView() {
                     <th>Score / Max</th>
                     <th>Percentage</th>
                     <th>Status</th>
-                    <th style={{ textAlign: 'right' }}>Action</th>
+                    <th className="text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -275,30 +263,28 @@ export default function EvidenceView() {
                     const isPassing = pct >= 60;
                     return (
                       <tr key={a.id}>
-                        <td style={{ fontWeight: 600 }}>{a.subject}</td>
-                        <td style={{ textTransform: 'capitalize', color: 'var(--text-secondary)' }}>{a.type || 'Exam'}</td>
-                        <td className="font-mono tabular-nums">Sem {a.semester || 1}</td>
-                        <td className="font-mono tabular-nums">
+                        <td className="font-semibold text-white">{a.subject}</td>
+                        <td className="capitalize text-[#9CA3AF]">{a.type || 'Exam'}</td>
+                        <td className="font-mono tabular-nums text-white">Sem {a.semester || 1}</td>
+                        <td className="font-mono tabular-nums text-white">
                           {a.score} / {a.max_score}
                         </td>
-                        <td className="font-mono tabular-nums" style={{ fontWeight: 600 }}>
+                        <td className="font-mono tabular-nums font-bold text-[#00FF66]">
                           {pct}%
                         </td>
                         <td>
                           <span className={`pill ${isPassing ? 'pill-ready' : 'pill-gap'}`}>
-                            {isPassing ? 'Cleared' : 'Needs Review'}
+                            {isPassing ? 'Verified' : 'Needs Review'}
                           </span>
                         </td>
-                        <td style={{ textAlign: 'right' }}>
+                        <td className="text-right">
                           <button
                             type="button"
                             onClick={() => handleDeleteAssessment(a.id)}
-                            style={{ background: 'none', border: 'none', color: '#a1a1aa', padding: '4px', cursor: 'pointer' }}
+                            className="p-1.5 text-[#6B7280] hover:text-[#EF4444] hover:bg-[#18181D] rounded-lg transition-colors"
                             title="Delete"
-                            onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = '#a1a1aa')}
                           >
-                            <Trash2 size={14} />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </td>
                       </tr>
@@ -313,24 +299,24 @@ export default function EvidenceView() {
 
       {/* Section 2: Projects */}
       {activeSection === 'projects' && (
-        <div className="panel" style={{ overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-default)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="panel overflow-hidden rounded-2xl">
+          <div className="p-5 border-b border-[#222228] flex justify-between items-center bg-[#0C0C0F]">
             <div>
-              <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Project Repositories & Evidence</h3>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+              <h3 className="text-sm font-bold text-white m-0">Project Repositories & Evidence</h3>
+              <p className="text-xs text-[#9CA3AF] m-0 mt-0.5">
                 Practical code evidence matched against benchmark target role skill matrices
               </p>
             </div>
           </div>
 
           {projects.length === 0 ? (
-            <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <FolderGit2 size={28} style={{ margin: '0 auto 8px auto', opacity: 0.5 }} />
-              <div style={{ fontSize: '13px', fontWeight: 500 }}>No projects logged yet</div>
-              <p style={{ fontSize: '12px', marginTop: '4px' }}>Add full-stack, AI, or backend projects to provide skill verification evidence.</p>
+            <div className="p-12 text-center text-[#6B7280]">
+              <FolderGit2 className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#00FF66]" />
+              <div className="text-xs font-semibold text-white">No projects logged yet</div>
+              <p className="text-xs mt-1 text-[#6B7280]">Add full-stack, AI, or backend projects to provide skill verification evidence.</p>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
+            <div className="overflow-x-auto">
               <table className="data-table">
                 <thead>
                   <tr>
@@ -338,7 +324,7 @@ export default function EvidenceView() {
                     <th>Complexity</th>
                     <th>Tech Stack Evidence</th>
                     <th>Links</th>
-                    <th style={{ textAlign: 'right' }}>Action</th>
+                    <th className="text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -348,10 +334,10 @@ export default function EvidenceView() {
                       p.complexity === 'Advanced' ? 'pill-ready' : p.complexity === 'Intermediate' ? 'pill-developing' : 'pill-neutral';
                     return (
                       <tr key={p.id}>
-                        <td style={{ maxWidth: '320px' }}>
-                          <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{p.title}</div>
+                        <td className="max-w-[320px]">
+                          <div className="font-semibold text-white">{p.title}</div>
                           {p.description && (
-                            <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px', lineHeight: 1.4 }}>
+                            <div className="text-xs text-[#9CA3AF] mt-1 line-clamp-2">
                               {p.description}
                             </div>
                           )}
@@ -360,24 +346,24 @@ export default function EvidenceView() {
                           <span className={`pill ${compClass}`}>{p.complexity || 'Intermediate'}</span>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          <div className="flex flex-wrap gap-1.5">
                             {techList.map((tech, idx) => (
-                              <span key={idx} className="pill pill-neutral font-mono">
+                              <span key={idx} className="px-2 py-0.5 rounded-md bg-[#18181D] text-[#00FF66] border border-[#222228] text-[11px] font-mono">
                                 {tech}
                               </span>
                             ))}
                           </div>
                         </td>
                         <td>
-                          <div style={{ display: 'flex', gap: '8px' }}>
+                          <div className="flex items-center gap-3">
                             {p.repo_url && (
                               <a
                                 href={p.repo_url}
                                 target="_blank"
                                 rel="noreferrer"
-                                style={{ fontSize: '12px', color: '#2563eb', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                                className="text-xs text-[#00FF66] hover:underline inline-flex items-center gap-1 font-mono"
                               >
-                                Repo <ExternalLink size={11} />
+                                Repo <ExternalLink className="w-3 h-3" />
                               </a>
                             )}
                             {p.live_url && (
@@ -385,23 +371,21 @@ export default function EvidenceView() {
                                 href={p.live_url}
                                 target="_blank"
                                 rel="noreferrer"
-                                style={{ fontSize: '12px', color: '#047857', display: 'inline-flex', alignItems: 'center', gap: '3px' }}
+                                className="text-xs text-[#60A5FA] hover:underline inline-flex items-center gap-1 font-mono"
                               >
-                                Demo <ExternalLink size={11} />
+                                Live <ExternalLink className="w-3 h-3" />
                               </a>
                             )}
                           </div>
                         </td>
-                        <td style={{ textAlign: 'right' }}>
+                        <td className="text-right">
                           <button
                             type="button"
                             onClick={() => handleDeleteProject(p.id)}
-                            style={{ background: 'none', border: 'none', color: '#a1a1aa', padding: '4px', cursor: 'pointer' }}
+                            className="p-1.5 text-[#6B7280] hover:text-[#EF4444] hover:bg-[#18181D] rounded-lg transition-colors"
                             title="Delete"
-                            onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = '#a1a1aa')}
                           >
-                            <Trash2 size={14} />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </td>
                       </tr>
@@ -416,24 +400,24 @@ export default function EvidenceView() {
 
       {/* Section 3: Certifications */}
       {activeSection === 'certifications' && (
-        <div className="panel" style={{ overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-default)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="panel overflow-hidden rounded-2xl">
+          <div className="p-5 border-b border-[#222228] flex justify-between items-center bg-[#0C0C0F]">
             <div>
-              <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Certifications & Badges</h3>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+              <h3 className="text-sm font-bold text-white m-0">Certifications & Badges</h3>
+              <p className="text-xs text-[#9CA3AF] m-0 mt-0.5">
                 Industry-recognized credentials boosting your consistency and skill indices
               </p>
             </div>
           </div>
 
           {certifications.length === 0 ? (
-            <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <Award size={28} style={{ margin: '0 auto 8px auto', opacity: 0.5 }} />
-              <div style={{ fontSize: '13px', fontWeight: 500 }}>No certifications logged yet</div>
-              <p style={{ fontSize: '12px', marginTop: '4px' }}>Add AWS, Python, HackerRank, or Coursera credentials.</p>
+            <div className="p-12 text-center text-[#6B7280]">
+              <Award className="w-8 h-8 mx-auto mb-2 opacity-40 text-[#00FF66]" />
+              <div className="text-xs font-semibold text-white">No certifications logged yet</div>
+              <p className="text-xs mt-1 text-[#6B7280]">Add AWS, Python, HackerRank, or Coursera credentials.</p>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
+            <div className="overflow-x-auto">
               <table className="data-table">
                 <thead>
                   <tr>
@@ -441,28 +425,26 @@ export default function EvidenceView() {
                     <th>Issuer</th>
                     <th>Type</th>
                     <th>Issued Date</th>
-                    <th style={{ textAlign: 'right' }}>Action</th>
+                    <th className="text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {certifications.map((c) => (
                     <tr key={c.id}>
-                      <td style={{ fontWeight: 600 }}>{c.title}</td>
-                      <td style={{ color: 'var(--text-secondary)' }}>{c.issuer || 'Online'}</td>
+                      <td className="font-semibold text-white">{c.title}</td>
+                      <td className="text-[#9CA3AF]">{c.issuer || 'Online'}</td>
                       <td>
                         <span className="pill pill-neutral font-mono">{c.type || 'Certification'}</span>
                       </td>
-                      <td className="font-mono tabular-nums">{c.issued_date || 'N/A'}</td>
-                      <td style={{ textAlign: 'right' }}>
+                      <td className="font-mono tabular-nums text-[#9CA3AF]">{c.issued_date || 'N/A'}</td>
+                      <td className="text-right">
                         <button
                           type="button"
                           onClick={() => handleDeleteCertification(c.id)}
-                          style={{ background: 'none', border: 'none', color: '#a1a1aa', padding: '4px', cursor: 'pointer' }}
+                          className="p-1.5 text-[#6B7280] hover:text-[#EF4444] hover:bg-[#18181D] rounded-lg transition-colors"
                           title="Delete"
-                          onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-                          onMouseLeave={(e) => (e.currentTarget.style.color = '#a1a1aa')}
                         >
-                          <Trash2 size={14} />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </td>
                     </tr>
@@ -478,12 +460,11 @@ export default function EvidenceView() {
       {showAddModal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div
-            className="panel"
-            style={{ width: '100%', maxWidth: '460px', padding: '24px', backgroundColor: '#ffffff' }}
+            className="panel p-6 w-full max-w-md bg-[#111114] border border-[#222228] shadow-[0_0_30px_rgba(0,0,0,0.8)] rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-base font-bold text-white m-0">
                 {modalType === 'assessment' && 'Add Academic Assessment'}
                 {modalType === 'project' && 'Add Project Repository'}
                 {modalType === 'certification' && 'Add Certification'}
@@ -491,14 +472,14 @@ export default function EvidenceView() {
               <button
                 type="button"
                 onClick={closeModal}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', padding: '4px' }}
+                className="p-1 text-[#9CA3AF] hover:text-white rounded-lg"
               >
-                <X size={16} />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {modalError && (
-              <div style={{ padding: '8px 12px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '12px', marginBottom: '14px' }}>
+              <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs mb-4">
                 {modalError}
               </div>
             )}
@@ -506,8 +487,8 @@ export default function EvidenceView() {
             <form onSubmit={handleSubmit}>
               {modalType === 'assessment' && (
                 <>
-                  <div style={{ marginBottom: '12px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                  <div className="mb-3.5">
+                    <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                       Subject Name
                     </label>
                     <input
@@ -519,9 +500,9 @@ export default function EvidenceView() {
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                  <div className="grid grid-cols-2 gap-3 mb-3.5">
                     <div>
-                      <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                      <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                         Score Obtained
                       </label>
                       <input
@@ -533,7 +514,7 @@ export default function EvidenceView() {
                       />
                     </div>
                     <div>
-                      <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                      <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                         Maximum Score
                       </label>
                       <input
@@ -546,9 +527,9 @@ export default function EvidenceView() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+                  <div className="grid grid-cols-2 gap-3 mb-5">
                     <div>
-                      <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                      <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                         Assessment Type
                       </label>
                       <select
@@ -561,7 +542,7 @@ export default function EvidenceView() {
                       </select>
                     </div>
                     <div>
-                      <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                      <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                         Semester
                       </label>
                       <select
@@ -580,8 +561,8 @@ export default function EvidenceView() {
 
               {modalType === 'project' && (
                 <>
-                  <div style={{ marginBottom: '12px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                  <div className="mb-3.5">
+                    <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                       Project Title
                     </label>
                     <input
@@ -593,20 +574,20 @@ export default function EvidenceView() {
                     />
                   </div>
 
-                  <div style={{ marginBottom: '12px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                  <div className="mb-3.5">
+                    <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                       Description
                     </label>
                     <textarea
                       rows={2}
-                      placeholder="Brief summary of architecture, APIs, or algorithms"
+                      placeholder="Brief architecture, models, or algorithms summary"
                       value={formData.description || ''}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     />
                   </div>
 
-                  <div style={{ marginBottom: '12px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                  <div className="mb-3.5">
+                    <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                       Tech Stack (comma-separated)
                     </label>
                     <input
@@ -618,9 +599,9 @@ export default function EvidenceView() {
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                  <div className="grid grid-cols-2 gap-3 mb-5">
                     <div>
-                      <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                      <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                         Complexity Tier
                       </label>
                       <select
@@ -633,8 +614,8 @@ export default function EvidenceView() {
                       </select>
                     </div>
                     <div>
-                      <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
-                        GitHub / Repo URL
+                      <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
+                        Repository URL
                       </label>
                       <input
                         type="url"
@@ -649,8 +630,8 @@ export default function EvidenceView() {
 
               {modalType === 'certification' && (
                 <>
-                  <div style={{ marginBottom: '12px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                  <div className="mb-3.5">
+                    <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                       Certification Title
                     </label>
                     <input
@@ -662,9 +643,9 @@ export default function EvidenceView() {
                     />
                   </div>
 
-                  <div style={{ marginBottom: '12px' }}>
-                    <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
-                      Issuer / Platform
+                  <div className="mb-3.5">
+                    <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
+                      Issuer / Organization
                     </label>
                     <input
                       type="text"
@@ -674,9 +655,9 @@ export default function EvidenceView() {
                     />
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+                  <div className="grid grid-cols-2 gap-3 mb-5">
                     <div>
-                      <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                      <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                         Credential Type
                       </label>
                       <select
@@ -689,7 +670,7 @@ export default function EvidenceView() {
                       </select>
                     </div>
                     <div>
-                      <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                      <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
                         Issued Date
                       </label>
                       <input
@@ -702,12 +683,12 @@ export default function EvidenceView() {
                 </>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+              <div className="flex justify-end gap-3 mt-5">
                 <button type="button" className="btn-secondary" onClick={closeModal} disabled={submitting}>
                   Cancel
                 </button>
                 <button type="submit" className="btn-primary" disabled={submitting}>
-                  {submitting ? 'Saving...' : 'Add Record'}
+                  {submitting ? 'Saving...' : 'Save Record'}
                 </button>
               </div>
             </form>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Lock, Mail, Eye, EyeOff, AlertCircle, ArrowRight, ShieldCheck, GraduationCap, UserCheck } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff, AlertCircle, ArrowRight, GraduationCap, UserCheck, Zap } from 'lucide-react';
 
 export default function Login({ onSwitchToRegister }) {
   const { login, error, clearError, isServerOnline } = useAuth();
@@ -33,7 +33,7 @@ export default function Login({ onSwitchToRegister }) {
         password: targetPassword,
       });
     } catch (err) {
-      // Error handled in AuthContext
+      // Handled in AuthContext
     } finally {
       setIsSubmitting(false);
     }
@@ -54,111 +54,111 @@ export default function Login({ onSwitchToRegister }) {
   const activeError = localError || error;
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '24px 16px', backgroundColor: 'var(--bg-canvas)' }}>
-      <div className="panel" style={{ width: '100%', maxWidth: '420px', padding: '28px 24px', backgroundColor: '#ffffff' }}>
-        {/* Institutional Branding */}
-        <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 10px', borderRadius: '9999px', backgroundColor: '#f4f4f5', border: '1px solid #e4e4e7', fontSize: '11px', fontWeight: 600, color: '#52525b', marginBottom: '12px' }}>
-            <GraduationCap size={13} style={{ color: '#2563eb' }} />
+    <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-[#09090B] relative overflow-hidden">
+      {/* Background Neon Ambient Glow */}
+      <div className="absolute w-[500px] h-[500px] bg-[radial-gradient(circle,rgba(0,255,102,0.06)_0%,transparent_70%)] pointer-events-none" />
+
+      <div className="panel w-full max-w-md p-8 bg-[#111114] border border-[#222228] shadow-[0_0_40px_rgba(0,0,0,0.9)] rounded-2xl relative z-10">
+        {/* Emblem & Branding */}
+        <div className="mb-6 text-center">
+          <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-[#18181D] border border-[#00FF66]/40 flex items-center justify-center text-[#00FF66] font-mono font-bold text-lg shadow-[0_0_20px_rgba(0,255,102,0.3)]">
+            SP
+          </div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#18181D] border border-[#222228] text-[11px] font-mono font-semibold text-[#00FF66] mb-3">
+            <GraduationCap className="w-3.5 h-3.5" />
             <span>KIET GROUP OF INSTITUTIONS</span>
           </div>
-          <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', margin: 0 }}>
-            StudentPulse AI
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">
+            StudentPulse <span className="text-[#00FF66]">AI</span>
           </h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px' }}>
+          <p className="text-xs text-[#9CA3AF] mt-1 font-mono">
             Student Success, Skill Readiness & Career Analytics
           </p>
         </div>
 
-        {/* Server Offline Warning */}
+        {/* Offline Warning */}
         {!isServerOnline && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '12px', marginBottom: '16px' }}>
-            <AlertCircle size={15} style={{ flexShrink: 0 }} />
-            <span>Backend offline. Check Flask server connection.</span>
+          <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs mb-4">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>Backend server offline. Reconnecting to Flask API...</span>
           </div>
         )}
 
         {/* Active Error Banner */}
         {activeError && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '12px', marginBottom: '16px' }}>
-            <AlertCircle size={15} style={{ flexShrink: 0 }} />
+          <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs mb-4">
+            <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{activeError}</span>
           </div>
         )}
 
-        {/* 1-Click MSE-2 Demo Login Strip */}
-        <div style={{ marginBottom: '20px', padding: '12px', backgroundColor: '#fafafa', border: '1px solid #e4e4e7', borderRadius: '6px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#71717a', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <UserCheck size={12} />
-            <span>1-Click MSE-2 Evaluation Logins</span>
+        {/* 1-Click MSE-2 Evaluation Logins */}
+        <div className="mb-6 p-3.5 bg-[#18181D] border border-[#222228] rounded-xl">
+          <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-[#00FF66] mb-2.5 flex items-center gap-1.5">
+            <Zap className="w-3.5 h-3.5" />
+            <span>1-Click MSE-2 Demo Access</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+          <div className="grid grid-cols-2 gap-2.5">
             <button
               type="button"
-              className="btn-secondary"
+              className="py-2 px-3 text-xs font-semibold rounded-lg bg-[#111114] hover:bg-[#222228] text-white border border-[#32323C] hover:border-[#00FF66]/50 transition-all cursor-pointer"
               onClick={handleDemoStudent}
               disabled={isSubmitting}
-              style={{ fontSize: '12px', padding: '6px 8px', justifyContent: 'center' }}
             >
-              <span>Student Demo</span>
+              Student Demo
             </button>
             <button
               type="button"
-              className="btn-secondary"
+              className="py-2 px-3 text-xs font-semibold rounded-lg bg-[#111114] hover:bg-[#222228] text-white border border-[#32323C] hover:border-[#00FF66]/50 transition-all cursor-pointer"
               onClick={handleDemoFaculty}
               disabled={isSubmitting}
-              style={{ fontSize: '12px', padding: '6px 8px', justifyContent: 'center' }}
             >
-              <span>Faculty Demo</span>
+              Faculty Demo
             </button>
           </div>
         </div>
 
-        <div style={{ position: 'relative', textAlign: 'center', margin: '16px 0' }}>
-          <div style={{ position: 'absolute', inset: '0', display: 'flex', alignItems: 'center' }}>
-            <div style={{ width: '100%', borderTop: '1px solid #e4e4e7' }}></div>
+        <div className="relative text-center my-4">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-[#222228]"></div>
           </div>
-          <div style={{ position: 'relative', display: 'inline-block', padding: '0 8px', backgroundColor: '#ffffff', fontSize: '11px', color: '#a1a1aa' }}>
-            or continue with email
+          <div className="relative inline-block px-3 bg-[#111114] text-[11px] font-mono text-[#6B7280]">
+            or sign in with credentials
           </div>
         </div>
 
         {/* Login Form */}
         <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }} noValidate>
-          <div style={{ marginBottom: '14px' }}>
-            <label htmlFor="login-email" style={{ fontSize: '12px', fontWeight: 500, color: '#52525b', display: 'block', marginBottom: '4px' }}>
+          <div className="mb-4">
+            <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
               Institutional Email
             </label>
-            <div style={{ position: 'relative' }}>
-              <Mail size={15} style={{ position: 'absolute', left: '10px', top: '10px', color: '#a1a1aa' }} />
+            <div className="relative">
+              <Mail className="w-4 h-4 absolute left-3 top-3 text-[#6B7280]" />
               <input
-                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="rollno.2628mcaXXXX@kiet.edu"
-                style={{ paddingLeft: '32px' }}
+                className="pl-9 bg-[#18181D] border-[#222228] text-white"
                 autoComplete="email"
                 required
               />
             </div>
           </div>
 
-          <div style={{ marginBottom: '18px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-              <label htmlFor="login-password" style={{ fontSize: '12px', fontWeight: 500, color: '#52525b', margin: 0 }}>
-                Password
-              </label>
-            </div>
-            <div style={{ position: 'relative' }}>
-              <Lock size={15} style={{ position: 'absolute', left: '10px', top: '10px', color: '#a1a1aa' }} />
+          <div className="mb-6">
+            <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
+              Password
+            </label>
+            <div className="relative">
+              <Lock className="w-4 h-4 absolute left-3 top-3 text-[#6B7280]" />
               <input
-                id="login-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                style={{ paddingLeft: '32px', paddingRight: '34px' }}
+                className="pl-9 pr-10 bg-[#18181D] border-[#222228] text-white"
                 autoComplete="current-password"
                 required
               />
@@ -166,18 +166,17 @@ export default function Login({ onSwitchToRegister }) {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 tabIndex={-1}
-                style={{ position: 'absolute', right: '6px', top: '6px', background: 'none', border: 'none', padding: '4px', color: '#a1a1aa', cursor: 'pointer' }}
+                className="absolute right-2.5 top-2.5 text-[#6B7280] hover:text-white p-1"
               >
-                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
 
           <button
             type="submit"
-            className="btn-primary"
+            className="btn-primary w-full py-3"
             disabled={isSubmitting}
-            style={{ width: '100%', padding: '9px 16px', fontSize: '13px', fontWeight: 600 }}
           >
             {isSubmitting ? (
               <span>Authenticating...</span>
@@ -190,22 +189,22 @@ export default function Login({ onSwitchToRegister }) {
           </button>
         </form>
 
-        <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '12px', color: '#71717a' }}>
+        <div className="mt-5 text-center text-xs text-[#9CA3AF]">
           New student?{' '}
           <button
             type="button"
             onClick={() => { clearError(); onSwitchToRegister(); }}
-            style={{ background: 'none', border: 'none', color: '#2563eb', fontWeight: 500, padding: 0, textDecoration: 'underline' }}
+            className="text-[#00FF66] font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer"
           >
             Create an account
           </button>
         </div>
       </div>
 
-      {/* Institutional & Team Attribution Footer */}
-      <div style={{ marginTop: '20px', maxWidth: '420px', textAlign: 'center', fontSize: '11px', color: '#71717a', lineHeight: 1.6 }}>
+      {/* Attribution Footer */}
+      <div className="mt-6 max-w-md text-center text-[11px] text-[#6B7280] font-mono leading-relaxed">
         <div>Department of Computer Applications • MCA AI & Python Programming</div>
-        <div style={{ color: '#a1a1aa', marginTop: '2px' }}>
+        <div className="text-[#9CA3AF] mt-1">
           Team: Amarjeet Kumar (2628MCA0069), Akhilesh Chaubey, Arpit Tiwari, Ankit Pathak, Archana Tiwari
         </div>
       </div>

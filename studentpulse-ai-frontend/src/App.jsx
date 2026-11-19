@@ -10,34 +10,11 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'var(--bg-canvas)',
-          color: 'var(--text-muted)',
-          gap: '12px',
-        }}
-      >
-        <div
-          style={{
-            width: '28px',
-            height: '28px',
-            border: '2px solid #e4e4e7',
-            borderTopColor: '#18181b',
-            borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite',
-          }}
-        />
-        <span style={{ fontSize: '13px', fontWeight: 500 }}>Initializing StudentPulse AI...</span>
-        <style>{`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#09090B] text-[#9CA3AF] gap-3">
+        <div className="w-8 h-8 border-2 border-[#222228] border-t-[#00FF66] rounded-full animate-spin shadow-[0_0_12px_rgba(0,255,102,0.3)]" />
+        <span className="text-xs font-mono text-white tracking-wider">
+          INITIALIZING STUDENTPULSE AI...
+        </span>
       </div>
     );
   }

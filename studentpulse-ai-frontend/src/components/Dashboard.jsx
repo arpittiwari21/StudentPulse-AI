@@ -36,24 +36,23 @@ export default function Dashboard() {
   const currentTabInfo = tabTitles[activeTab] || tabTitles.overview;
 
   const handleContextUpdated = () => {
-    // Triggers re-render and re-fetch in views
     setRefreshKey((k) => k + 1);
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-canvas)' }}>
+    <div className="flex min-h-screen bg-[#09090B]">
       {/* Fixed Left Sidebar */}
       <Sidebar activeTab={activeTab} onSelectTab={setActiveTab} />
 
       {/* Main Workspace Area */}
-      <div style={{ marginLeft: '240px', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+      <div className="ml-[240px] flex-1 min-w-0 flex flex-col bg-[#09090B]">
         <Header
           title={currentTabInfo.title}
           subtitle={currentTabInfo.subtitle}
           onOpenContextModal={() => setShowContextModal(true)}
         />
 
-        <main style={{ flex: 1 }}>
+        <main className="flex-1 bg-[#09090B]">
           {activeTab === 'overview' && (
             <OverviewView key={refreshKey} onNavigateTab={setActiveTab} />
           )}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { updateContext } from '../api/student';
 import { useAuth } from '../context/AuthContext';
-import { X, Check } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 
 export default function ContextModal({ isOpen, onClose, onContextUpdated }) {
   const { user, token, refreshProfile } = useAuth();
@@ -37,41 +37,43 @@ export default function ContextModal({ isOpen, onClose, onContextUpdated }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
-        className="panel"
-        style={{ width: '100%', maxWidth: '440px', padding: '24px', backgroundColor: '#ffffff' }}
+        className="panel p-6 w-full max-w-md bg-[#111114] border border-[#222228] rounded-2xl shadow-[0_0_30px_rgba(0,0,0,0.8)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div className="flex justify-between items-center mb-5">
           <div>
-            <h3 style={{ fontSize: '16px', fontWeight: 700, margin: 0 }}>Update Career Context</h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+            <h3 className="text-base font-bold text-white tracking-tight m-0 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#00FF66]" />
+              <span>Update Career Context</span>
+            </h3>
+            <p className="text-xs text-[#9CA3AF] m-0 mt-0.5">
               Re-align your target job matrix & daily preparation commitments
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', padding: '4px' }}
+            className="p-1 text-[#9CA3AF] hover:text-white rounded-lg"
           >
             <X size={16} />
           </button>
         </div>
 
         {error && (
-          <div style={{ padding: '8px 12px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '6px', color: '#b91c1c', fontSize: '12px', marginBottom: '14px' }}>
+          <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs mb-4">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '14px' }}>
-            <label htmlFor="context-target-role" style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+          <div className="mb-4">
+            <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
               Target Job Role
             </label>
             <select
-              id="context-target-role"
               value={targetRole}
               onChange={(e) => setTargetRole(e.target.value)}
+              className="bg-[#18181D] border-[#222228] text-white"
             >
               <option value="Full-Stack Developer">Full-Stack Developer</option>
               <option value="AI/ML Engineer">AI/ML Engineer</option>
@@ -80,45 +82,45 @@ export default function ContextModal({ isOpen, onClose, onContextUpdated }) {
             </select>
           </div>
 
-          <div style={{ marginBottom: '14px' }}>
-            <label htmlFor="context-daily-hours" style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+          <div className="mb-4">
+            <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
               Daily Study Commitment (Hours)
             </label>
             <select
-              id="context-daily-hours"
               value={dailyHours}
               onChange={(e) => setDailyHours(parseFloat(e.target.value))}
+              className="bg-[#18181D] border-[#222228] text-white"
             >
               <option value={1.0}>1 Hour / day</option>
-              <option value={2.0}>2 Hours / day (Recommended)</option>
+              <option value={2.0}>2 Hours / day (Standard)</option>
               <option value={3.0}>3 Hours / day</option>
-              <option value={4.0}>4 Hours / day</option>
-              <option value={6.0}>6 Hours / day (Intensive)</option>
+              <option value={4.0}>4 Hours / day (Accelerated)</option>
+              <option value={6.0}>6 Hours / day (Intensive Sprint)</option>
             </select>
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label htmlFor="context-focus-area" style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+          <div className="mb-6">
+            <label className="text-xs font-semibold text-[#9CA3AF] block mb-1">
               Current Focus Area
             </label>
             <select
-              id="context-focus-area"
               value={focusArea}
               onChange={(e) => setFocusArea(e.target.value)}
+              className="bg-[#18181D] border-[#222228] text-white"
             >
-              <option value="Projects">Projects & Practical Code</option>
+              <option value="Projects">Projects & Production Code</option>
               <option value="DSA/Coding">DSA & Algorithmic Problem Solving</option>
               <option value="Core CS">Core CS (OS, DBMS, Computer Networks)</option>
               <option value="Interview Prep">Interview Preparation & Mock Rounds</option>
             </select>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+          <div className="flex justify-end gap-3">
             <button type="button" className="btn-secondary" onClick={onClose} disabled={isSaving}>
               Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={isSaving}>
-              {isSaving ? 'Updating...' : 'Save Context'}
+              {isSaving ? 'Re-aligning...' : 'Save Context Matrix'}
             </button>
           </div>
         </form>
