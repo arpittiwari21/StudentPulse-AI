@@ -3,6 +3,16 @@
 # Flask application factory — wires blueprints, CORS, static SPA serving
 # ─────────────────────────────────────────────────────────────────────────────
 import os
+import sys
+
+# Ensure both project root and backend dir are in sys.path regardless of execution working dir
+_CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+_PARENT_DIR = os.path.abspath(os.path.join(_CURRENT_DIR, ".."))
+if _PARENT_DIR not in sys.path:
+    sys.path.insert(0, _PARENT_DIR)
+if _CURRENT_DIR not in sys.path:
+    sys.path.insert(0, _CURRENT_DIR)
+
 import logging
 from flask import Flask, send_from_directory
 from flask_cors import CORS
@@ -19,7 +29,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
+FRONTEND_DIR = os.path.join(_PARENT_DIR, "frontend")
 
 
 def create_app() -> Flask:
@@ -60,6 +70,8 @@ def create_app() -> Flask:
     return app
 
 
+# WSGI application instance (accessible as app:app or wsgi:app)
+app = create_app()
+
 if __name__ == "__main__":
-    application = create_app()
-    application.run(host="0.0.0.0", port=5000, debug=config.DEBUG)
+    app.run(host="0.0.0.0", port=5000, debug=config.DEBUG)
