@@ -42,7 +42,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-[#09090B]">
-      {/* Fixed Left Sidebar with Responsive Mobile Drawer */}
+      {/* Left Sidebar (Sticky flex child on desktop, modal drawer on mobile) */}
       <Sidebar
         activeTab={activeTab}
         onSelectTab={(tab) => {
@@ -53,8 +53,8 @@ export default function Dashboard() {
         onClose={() => setMobileMenuOpen(false)}
       />
 
-      {/* Main Workspace Area: Properly Offset for Sidebar on Desktop (md:ml-64, ml-0 on mobile) */}
-      <div className="flex-1 min-w-0 flex flex-col md:ml-64 bg-[#09090B]">
+      {/* Main Workspace Area: Naturally fills 100% of remaining width with zero overlap */}
+      <div className="flex-1 min-w-0 flex flex-col bg-[#09090B]">
         <Header
           title={currentTabInfo.title}
           subtitle={currentTabInfo.subtitle}
