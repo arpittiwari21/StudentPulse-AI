@@ -75,7 +75,7 @@ def admin_required(f):
     @wraps(f)
     @token_required
     def decorated(*args, **kwargs):
-        if g.role != "faculty":
+        if g.role not in ("faculty", "admin"):
             return jsonify({"error": "Faculty access required."}), 403
         return f(*args, **kwargs)
     return decorated

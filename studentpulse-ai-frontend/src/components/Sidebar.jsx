@@ -12,7 +12,7 @@ import {
 export default function Sidebar({ activeTab, onSelectTab }) {
   const { user, logout } = useAuth();
 
-  const isFaculty = user?.role === 'admin';
+  const isFaculty = user?.role === 'admin' || user?.role === 'faculty';
 
   const navItems = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
