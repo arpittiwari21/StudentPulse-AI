@@ -1,135 +1,180 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getReadiness, getProgress } from '../../api/student';
 import {
-  TrendingUp,
   Award,
   BookOpen,
-  FolderGit2,
   Flame,
+  Check,
   CheckCircle2,
   AlertTriangle,
   ArrowRight,
   RefreshCw,
+  Plus,
+  Sparkles,
 } from 'lucide-react';
+import { Chart, registerables } from 'chart.js';
 
-function RadarChart({ labels, scores }) {
-  if (!labels || !scores || labels.length === 0) return null;
+// Register Chart.js elements
+Chart.register(...registerables);
 
-  const size = 260;
-  const center = size / 2;
-  const radius = 90;
-  const count = labels.length;
-
-  const getCoordinates = (value, index) => {
-    const angle = (Math.PI * 2 / count) * index - Math.PI / 2;
-    const r = (value / 100) * radius;
-    const x = center + r * Math.cos(angle);
-    const y = center + r * Math.sin(angle);
-    return { x, y };
-  };
-
-  const getLabelCoordinates = (index) => {
-    const angle = (Math.PI * 2 / count) * index - Math.PI / 2;
-    const r = radius + 22;
-    const x = center + r * Math.cos(angle);
-    const y = center + r * Math.sin(angle);
-    return { x, y };
-  };
-
-  const rings = [0.25, 0.5, 0.75, 1.0];
-
-  const polygonPoints = scores
-    .map((s, i) => {
-      const { x, y } = getCoordinates(s, i);
-      return `${x},${y}`;
-    })
-    .join(' ');
+function CircularProgressRing({ percentage, size = 36, strokeWidth = 3.5 }) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.min(100, Math.max(0, percentage));
+  const strokeDashoffset = circumference - (clamped / 100) * circumference;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <svg width={size} height={size} style={{ overflow: 'visible' }}>
-        {/* Concentric rings */}
-        {rings.map((factor, idx) => {
-          const ringPoints = Array.from({ length: count })
-            .map((_, i) => {
-              const angle = (Math.PI * 2 / count) * i - Math.PI / 2;
-              const r = radius * factor;
-              return `${center + r * Math.cos(angle)},${center + r * Math.sin(angle)}`;
-            })
-            .join(' ');
-          return (
-            <polygon
-              key={idx}
-              points={ringPoints}
-              fill="none"
-              stroke="#e4e4e7"
-              strokeWidth="1"
-            />
-          );
-        })}
-
-        {/* Spokes */}
-        {Array.from({ length: count }).map((_, i) => {
-          const angle = (Math.PI * 2 / count) * i - Math.PI / 2;
-          const x = center + radius * Math.cos(angle);
-          const y = center + radius * Math.sin(angle);
-          return (
-            <line
-              key={i}
-              x1={center}
-              y1={center}
-              x2={x}
-              y2={y}
-              stroke="#e4e4e7"
-              strokeWidth="1"
-            />
-          );
-        })}
-
-        {/* Value Polygon */}
-        <polygon
-          points={polygonPoints}
-          fill="rgba(37, 99, 235, 0.15)"
-          stroke="#2563eb"
-          strokeWidth="1.5"
+    <div className="relative inline-flex items-center justify-center shrink-0">
+      <svg width={size} height={size} className="transform -rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#e2e8f0"
+          strokeWidth={strokeWidth}
+          fill="transparent"
         />
-
-        {/* Point markers */}
-        {scores.map((s, i) => {
-          const { x, y } = getCoordinates(s, i);
-          return (
-            <circle
-              key={i}
-              cx={x}
-              cy={y}
-              r="3.5"
-              fill="#2563eb"
-              stroke="#ffffff"
-              strokeWidth="1.5"
-            />
-          );
-        })}
-
-        {/* Axis Labels */}
-        {labels.map((label, i) => {
-          const { x, y } = getLabelCoordinates(i);
-          return (
-            <text
-              key={i}
-              x={x}
-              y={y}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize="10"
-              fontWeight="500"
-              fill="#71717a"
-            >
-              {label}
-            </text>
-          );
-        })}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#10b981"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          fill="transparent"
+          className="transition-all duration-700 ease-out"
+        />
       </svg>
+      <span className="absolute text-[10px] font-mono font-bold text-slate-700">
+        {Math.round(clamped)}
+      </span>
+    </div>
+  );
+}
+
+function ActivityStrip({ streakDays, activeDays }) {
+  const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const activeCount = Math.min(7, Math.max(streakDays, activeDays > 0 ? (activeDays % 7 || 7) : 0));
+
+  return (
+    <div className="flex items-center gap-1.5 mt-2.5">
+      {days.map((day, idx) => {
+        const isActive = idx >= 7 - activeCount;
+        return (
+          <div key={idx} className="flex-1 flex flex-col items-center gap-1">
+            <div
+              className={`h-1.5 w-full rounded-full transition-colors ${
+                isActive ? 'bg-blue-600' : 'bg-slate-200'
+              }`}
+              title={`${day}: ${isActive ? 'Active' : 'Rest'}`}
+            />
+            <span className="text-[9px] font-mono text-slate-400 leading-none">{day}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function RadarChart({ labels, scores }) {
+  const canvasRef = useRef(null);
+  const chartInstanceRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current || !labels || !scores) return;
+
+    if (chartInstanceRef.current) {
+      chartInstanceRef.current.destroy();
+    }
+
+    const ctx = canvasRef.current.getContext('2d');
+    chartInstanceRef.current = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Readiness Score',
+            data: scores,
+            backgroundColor: 'rgba(37, 99, 235, 0.12)',
+            borderColor: '#2563eb',
+            borderWidth: 2,
+            pointBackgroundColor: '#2563eb',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+          padding: {
+            top: 16,
+            bottom: 24, // Generous padding so 'Projects' and 'Consistency' labels are never clipped
+            left: 20,
+            right: 20,
+          },
+        },
+        scales: {
+          r: {
+            suggestedMin: 0,
+            suggestedMax: 100,
+            ticks: {
+              stepSize: 25,
+              display: false,
+            },
+            grid: {
+              color: '#e2e8f0',
+            },
+            angleLines: {
+              color: '#e2e8f0',
+            },
+            pointLabels: {
+              font: {
+                family: "'Inter', -apple-system, sans-serif",
+                size: 11,
+                weight: '600',
+              },
+              color: '#475569',
+              padding: 16, // Generous padding to prevent clipping
+            },
+          },
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            backgroundColor: '#0f172a',
+            titleFont: { family: "'Inter', sans-serif", size: 12, weight: '600' },
+            bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
+            padding: 10,
+            cornerRadius: 6,
+            displayColors: false,
+            callbacks: {
+              label: (context) => ` Score: ${context.raw}%`,
+            },
+          },
+        },
+      },
+    });
+
+    return () => {
+      if (chartInstanceRef.current) {
+        chartInstanceRef.current.destroy();
+      }
+    };
+  }, [labels, scores]);
+
+  return (
+    <div className="w-full h-[280px] relative px-2 py-1">
+      <canvas ref={canvasRef} />
     </div>
   );
 }
@@ -141,6 +186,8 @@ export default function OverviewView({ onNavigateTab }) {
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [addedSkills, setAddedSkills] = useState({});
+  const [toastMessage, setToastMessage] = useState('');
 
   const loadData = async () => {
     setLoading(true);
@@ -164,17 +211,26 @@ export default function OverviewView({ onNavigateTab }) {
     loadData();
   }, [token]);
 
+  const handleAddSkillToFocus = (skill) => {
+    setAddedSkills((prev) => ({
+      ...prev,
+      [skill]: !prev[skill],
+    }));
+    setToastMessage(`"${skill}" ${addedSkills[skill] ? 'removed from' : 'added to'} targeted study focus.`);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
+
   if (loading) {
     return (
-      <div style={{ padding: '24px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+      <div className="p-6 flex flex-col gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="panel skeleton" style={{ height: '90px' }} />
+            <div key={i} className="panel skeleton h-[110px]" />
           ))}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-          <div className="panel skeleton" style={{ height: '360px' }} />
-          <div className="panel skeleton" style={{ height: '360px' }} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="panel skeleton h-[380px]" />
+          <div className="panel skeleton h-[380px]" />
         </div>
       </div>
     );
@@ -182,11 +238,15 @@ export default function OverviewView({ onNavigateTab }) {
 
   if (error) {
     return (
-      <div style={{ padding: '24px' }}>
-        <div style={{ padding: '16px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#b91c1c' }}>
-          <p style={{ fontWeight: 600, margin: '0 0 6px 0' }}>Could not load overview</p>
-          <p style={{ margin: 0, fontSize: '13px' }}>{error}</p>
-          <button type="button" className="btn-secondary" onClick={loadData} style={{ marginTop: '12px' }}>
+      <div className="p-6">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          <p className="font-semibold mb-1">Could not load overview</p>
+          <p className="text-sm m-0">{error}</p>
+          <button
+            type="button"
+            className="btn-secondary mt-3"
+            onClick={loadData}
+          >
             <RefreshCw size={14} /> Retry
           </button>
         </div>
@@ -196,152 +256,241 @@ export default function OverviewView({ onNavigateTab }) {
 
   const overallScore = Math.round(readiness?.overall_score || 0);
   const tier = readiness?.readiness_tier || 'Developing';
-  const tierClass =
-    tier === 'Industry Ready' ? 'pill-ready' : tier === 'Developing' ? 'pill-developing' : 'pill-gap';
+
+  // Standardized semantic status badges: amber for Needs Foundation
+  const getTierBadge = (t) => {
+    if (t === 'Industry Ready') {
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    }
+    if (t === 'Developing') {
+      return 'bg-blue-50 text-blue-700 border-blue-200';
+    }
+    return 'bg-amber-50 text-amber-700 border-amber-200';
+  };
 
   const streakDays = progress?.streak_days || 0;
   const activeDays = progress?.active_days || 0;
+  const academicPct = Math.round(readiness?.academic_index || 0);
 
   return (
-    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* 4-Card KPI Strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+    <div className="p-6 flex flex-col gap-6 bg-zinc-50 min-h-full">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs px-3.5 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* 1. 4-Card KPI Strip: Balanced 4-Column Responsive Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {/* KPI 1: Overall Readiness */}
-        <div className="panel" style={{ padding: '16px 20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>
-              Overall Readiness
-            </span>
-            <span className={`pill ${tierClass}`}>{tier}</span>
+        <div className="panel p-4 flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-medium text-slate-500">
+                Overall Readiness
+              </span>
+              <span className={`px-2 py-0.5 text-xs font-semibold rounded-full border whitespace-nowrap ${getTierBadge(tier)}`}>
+                {tier}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-bold text-slate-900 font-mono tabular-nums">
+                {overallScore}%
+              </span>
+              <span className="text-xs text-slate-400">composite score</span>
+            </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }} className="tabular-nums">
-              {overallScore}%
-            </span>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>composite score</span>
-          </div>
-          <div style={{ height: '4px', backgroundColor: '#f4f4f5', borderRadius: '2px', marginTop: '10px', overflow: 'hidden' }}>
-            <div
-              style={{
-                width: `${overallScore}%`,
-                height: '100%',
-                backgroundColor: overallScore >= 75 ? '#059669' : overallScore >= 50 ? '#2563eb' : '#dc2626',
-                borderRadius: '2px',
-              }}
-            />
+          <div className="mt-3">
+            <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  overallScore >= 75
+                    ? 'bg-emerald-600'
+                    : overallScore >= 50
+                    ? 'bg-blue-600'
+                    : 'bg-amber-500'
+                }`}
+                style={{ width: `${overallScore}%` }}
+              />
+            </div>
+            <div className="flex justify-between items-center text-[11px] text-slate-400 mt-1">
+              <span>Benchmark target</span>
+              <span className="font-mono tabular-nums">75%</span>
+            </div>
           </div>
         </div>
 
         {/* KPI 2: Skill Alignment */}
-        <div className="panel" style={{ padding: '16px 20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>
-              Skill Alignment Index
-            </span>
-            <Award size={15} style={{ color: 'var(--text-muted)' }} />
+        <div className="panel p-4 flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-medium text-slate-500">
+                Skill Alignment Index
+              </span>
+              <Award className="w-4 h-4 text-slate-400" />
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-bold text-slate-900 font-mono tabular-nums">
+                {Math.round(readiness?.skill_index || 0)}%
+              </span>
+              <span className="text-xs text-slate-400">40% weight</span>
+            </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }} className="tabular-nums">
-              {Math.round(readiness?.skill_index || 0)}%
+          <div className="text-xs text-slate-600 mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span>
+              <strong className="font-mono tabular-nums text-slate-900">{readiness?.matched_skills?.length || 0}</strong> matched
             </span>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>40% weight</span>
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>
-            <span className="font-mono tabular-nums">{readiness?.matched_skills?.length || 0}</span> matched •{' '}
-            <span className="font-mono tabular-nums">{readiness?.missing_skills?.length || 0}</span> gaps
+            <span className="text-slate-300">•</span>
+            <span>
+              <strong className="font-mono tabular-nums text-amber-700">{readiness?.missing_skills?.length || 0}</strong> skill gaps
+            </span>
           </div>
         </div>
 
-        {/* KPI 3: Academic Index */}
-        <div className="panel" style={{ padding: '16px 20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>
-              Academic & Exams Index
-            </span>
-            <BookOpen size={15} style={{ color: 'var(--text-muted)' }} />
+        {/* KPI 3: Academic Index (with compact circular progress ring) */}
+        <div className="panel p-4 flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-xs font-medium text-slate-500">
+                Academic & Exams Index
+              </span>
+              <BookOpen className="w-4 h-4 text-slate-400" />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-bold text-slate-900 font-mono tabular-nums">
+                  {academicPct}%
+                </span>
+                <span className="text-xs text-slate-400">35% weight</span>
+              </div>
+              <CircularProgressRing percentage={academicPct} size={34} strokeWidth={3} />
+            </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }} className="tabular-nums">
-              {Math.round(readiness?.academic_index || 0)}%
-            </span>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>35% weight</span>
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>
+          <div className="text-xs mt-3 pt-2 border-t border-slate-100">
             {readiness?.weak_subjects?.length ? (
-              <span style={{ color: '#b91c1c' }}>Weak: {readiness.weak_subjects.join(', ')}</span>
+              <span className="text-amber-700 font-medium truncate block">
+                Needs review: {readiness.weak_subjects.join(', ')}
+              </span>
             ) : (
-              <span style={{ color: '#047857' }}>All subjects above threshold</span>
+              <span className="text-emerald-600 font-medium flex items-center gap-1">
+                <Check className="w-3.5 h-3.5 shrink-0" />
+                <span>All subjects above threshold</span>
+              </span>
             )}
           </div>
         </div>
 
-        {/* KPI 4: Evidence & Streak */}
-        <div className="panel" style={{ padding: '16px 20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)' }}>
-              Study Streak & Consistency
-            </span>
-            <Flame size={15} style={{ color: '#ea580c' }} />
+        {/* KPI 4: Evidence & Streak (with 7-day mini activity strip and zero-streak framing) */}
+        <div className="panel p-4 flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-start mb-1">
+              <span className="text-xs font-medium text-slate-500">
+                Study Streak & Consistency
+              </span>
+              <Flame className={`w-4 h-4 ${streakDays > 0 ? 'text-amber-500' : 'text-slate-300'}`} />
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-bold text-slate-900 font-mono tabular-nums">
+                {streakDays}
+              </span>
+              <span className="text-xs font-medium text-slate-500">days streak</span>
+            </div>
+            {/* 7-Day Activity Strip */}
+            <ActivityStrip streakDays={streakDays} activeDays={activeDays} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-            <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }} className="tabular-nums">
-              {streakDays} <span style={{ fontSize: '16px', fontWeight: 500 }}>days</span>
-            </span>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>({activeDays} active days)</span>
-          </div>
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '8px' }}>
-            <span className="font-mono tabular-nums">{readiness?.project_count || 0}</span> projects •{' '}
-            <span className="font-mono tabular-nums">{readiness?.cert_count || 0}</span> certifications
-          </div>
+
+          {/* Zero-Streak Framing */}
+          {streakDays === 0 ? (
+            <div className="mt-2.5 text-[11px] text-amber-700 bg-amber-50/90 border border-amber-200/90 rounded px-2 py-1 flex items-center gap-1.5 leading-snug">
+              <Sparkles className="w-3 h-3 text-amber-600 shrink-0" />
+              <span>Complete 1 milestone today to ignite your streak</span>
+            </div>
+          ) : (
+            <div className="text-xs text-slate-500 mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+              <span className="font-mono tabular-nums">{activeDays} active days logged</span>
+              <span className="font-mono text-[11px] text-slate-400">{readiness?.project_count || 0} projects</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Main 2-Column Split */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) minmax(360px, 1.2fr)', gap: '20px' }}>
-        {/* Left Column: Radar & Skills Alignment */}
-        <div className="panel" style={{ padding: '20px' }}>
-          <div style={{ marginBottom: '16px' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>Competency & Evidence Matrix</h3>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+      {/* 2. Main 2-Column Split */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Left Column: Competency & Evidence Matrix (with Chart.js radar & interactive skill pills) */}
+        <div className="panel p-5 flex flex-col">
+          <div className="mb-3">
+            <h3 className="text-sm font-bold text-slate-900 m-0">
+              Competency & Evidence Matrix
+            </h3>
+            <p className="text-xs text-slate-500 m-0 mt-0.5">
               Multi-dimensional readiness breakdown against {readiness?.target_role}
             </p>
           </div>
 
-          {radar && <RadarChart labels={radar.labels} scores={radar.scores} />}
+          {/* Chart.js Radar Canvas with unclipped axis labels */}
+          <div className="flex-1 flex items-center justify-center my-2">
+            {radar && <RadarChart labels={radar.labels} scores={radar.scores} />}
+          </div>
 
-          <div style={{ marginTop: '20px', borderTop: '1px solid var(--border-default)', paddingTop: '16px' }}>
-            <div style={{ marginBottom: '12px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
-                Verified Matched Skills ({readiness?.matched_skills?.length || 0})
+          {/* Interactive Skill Pills */}
+          <div className="mt-4 pt-4 border-t border-slate-200 flex flex-col gap-3.5">
+            {/* Verified Matched Skills */}
+            <div>
+              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <span>Verified Matched Skills ({readiness?.matched_skills?.length || 0})</span>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              <div className="flex flex-wrap gap-1.5">
                 {readiness?.matched_skills?.length ? (
                   readiness.matched_skills.map((skill, idx) => (
-                    <span key={idx} className="pill pill-ready">
-                      <CheckCircle2 size={10} />
-                      {skill}
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs"
+                    >
+                      <Check className="w-3 h-3 text-emerald-600 shrink-0" />
+                      <span>{skill}</span>
                     </span>
                   ))
                 ) : (
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No matched skills yet.</span>
+                  <span className="text-xs text-slate-400">No matched skills recorded yet.</span>
                 )}
               </div>
             </div>
 
+            {/* Target Role Skill Gaps (Interactive Clickable Pills) */}
             <div>
-              <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '6px' }}>
-                Target Role Skill Gaps ({readiness?.missing_skills?.length || 0})
+              <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                <span>Target Role Skill Gaps ({readiness?.missing_skills?.length || 0})</span>
+                <span className="text-[10px] text-slate-400 lowercase font-normal">click to target</span>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              <div className="flex flex-wrap gap-1.5">
                 {readiness?.missing_skills?.length ? (
-                  readiness.missing_skills.map((skill, idx) => (
-                    <span key={idx} className="pill pill-gap">
-                      <AlertTriangle size={10} />
-                      {skill}
-                    </span>
-                  ))
+                  readiness.missing_skills.map((skill, idx) => {
+                    const isSelected = !!addedSkills[skill];
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleAddSkillToFocus(skill)}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border transition-all cursor-pointer group shadow-2xs ${
+                          isSelected
+                            ? 'bg-blue-50 text-blue-700 border-blue-300 ring-1 ring-blue-300'
+                            : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300'
+                        }`}
+                        title="Click to add/remove this skill from targeted learning focus"
+                      >
+                        {isSelected ? (
+                          <Check className="w-3 h-3 text-blue-600 shrink-0" />
+                        ) : (
+                          <Plus className="w-3 h-3 text-slate-400 group-hover:text-blue-600 transition-colors shrink-0" />
+                        )}
+                        <span>{skill}</span>
+                      </button>
+                    );
+                  })
                 ) : (
-                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Zero skill gaps identified!</span>
+                  <span className="text-xs text-emerald-600 font-medium">Zero skill gaps identified! You are fully aligned.</span>
                 )}
               </div>
             </div>
@@ -349,74 +498,68 @@ export default function OverviewView({ onNavigateTab }) {
         </div>
 
         {/* Right Column: AI Readiness Diagnosis & Next Actions */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div className="panel" style={{ padding: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+        <div className="flex flex-col gap-5">
+          <div className="panel p-5">
+            <div className="flex items-start justify-between gap-3 mb-3">
               <div>
-                <h3 style={{ fontSize: '14px', fontWeight: 700, margin: 0 }}>AI Readiness Diagnosis</h3>
-                <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+                <h3 className="text-sm font-bold text-slate-900 m-0">AI Readiness Diagnosis</h3>
+                <p className="text-xs text-slate-500 m-0 mt-0.5">
                   Context-aware readiness evaluation for {readiness?.target_role}
                 </p>
               </div>
-              <span className={`pill ${tierClass}`}>{tier}</span>
+              <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full border whitespace-nowrap ${getTierBadge(tier)}`}>
+                {tier}
+              </span>
             </div>
 
-            <div
-              style={{
-                fontSize: '13px',
-                color: 'var(--text-secondary)',
-                lineHeight: 1.6,
-                padding: '12px 14px',
-                backgroundColor: 'var(--bg-subtle)',
-                borderRadius: '6px',
-                border: '1px solid var(--border-default)',
-                marginBottom: '16px',
-              }}
-            >
+            <div className="text-xs text-slate-600 leading-relaxed p-3.5 bg-slate-50 rounded-lg border border-slate-200 mb-4">
               Candidate demonstrates an overall readiness score of{' '}
-              <strong className="font-mono tabular-nums">{overallScore}%</strong>. Academic standing is rated at{' '}
-              <span className="font-mono tabular-nums">{Math.round(readiness?.academic_index || 0)}%</span> with{' '}
-              <span className="font-mono tabular-nums">{Math.round(readiness?.skill_index || 0)}%</span> role skill alignment.
+              <strong className="font-mono tabular-nums text-slate-900">{overallScore}%</strong>. Academic standing is rated at{' '}
+              <span className="font-mono tabular-nums text-slate-900">{academicPct}%</span> with{' '}
+              <span className="font-mono tabular-nums text-slate-900">{Math.round(readiness?.skill_index || 0)}%</span> role skill alignment.
               {readiness?.missing_skills?.length ? (
-                <> Key focal gaps include <strong>{readiness.missing_skills.slice(0, 3).join(', ')}</strong>.</>
+                <> Key focal gaps include <strong className="text-slate-800">{readiness.missing_skills.slice(0, 3).join(', ')}</strong>.</>
               ) : null}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {/* Clear CTA Hierarchy */}
+            <div className="flex flex-col gap-2 mt-4">
+              {/* Primary Prominent Solid Dark Button */}
               <button
                 type="button"
-                className="btn-primary"
                 onClick={() => onNavigateTab('action-plan')}
-                style={{ padding: '10px 16px', width: '100%', justifyContent: 'space-between' }}
+                className="w-full py-2.5 px-4 bg-slate-900 text-white hover:bg-slate-800 transition-colors rounded-lg font-semibold text-xs flex items-center justify-between shadow-xs cursor-pointer"
               >
                 <span>Generate & View AI Action Plan</span>
-                <ArrowRight size={14} />
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
+              {/* Secondary Clean Ghost Button / Subtle Inline Link */}
               <button
                 type="button"
-                className="btn-secondary"
                 onClick={() => onNavigateTab('evidence')}
-                style={{ padding: '9px 16px', width: '100%', justifyContent: 'space-between' }}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900 transition-colors py-1.5 px-2 rounded-md hover:bg-slate-100 cursor-pointer w-fit mt-1"
               >
-                <span>Add Assessments, Projects & Certifications</span>
-                <FolderGit2 size={14} />
+                <span>+ Add assessments, projects & certifications</span>
+                <ArrowRight className="w-3 h-3" />
               </button>
             </div>
           </div>
 
-          {/* Quick Consistency & Daily Commitment Card */}
-          <div className="panel" style={{ padding: '20px' }}>
-            <h4 style={{ fontSize: '13px', fontWeight: 700, margin: '0 0 8px 0' }}>Daily Study Commitment</h4>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '0 0 12px 0' }}>
-              Based on your context, the recommended pacing is tailored to your allocated hours.
+          {/* Daily Commitment & Consistency Card */}
+          <div className="panel p-5">
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2">
+              Daily Study Commitment
+            </h4>
+            <p className="text-xs text-slate-500 mb-3">
+              Action plans and milestone deadlines adapt dynamically to your daily available study allocation.
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', backgroundColor: '#fafafa', border: '1px solid var(--border-default)', borderRadius: '6px' }}>
+            <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg">
               <div>
-                <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>Active Streak Target</div>
-                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Complete daily milestone tasks to build consistency</div>
+                <div className="text-xs font-semibold text-slate-900">Active Streak Target</div>
+                <div className="text-[11px] text-slate-500">Log task completions daily to build placement momentum</div>
               </div>
-              <span className="pill pill-developing font-mono tabular-nums">
+              <span className="px-2.5 py-1 text-xs font-semibold rounded-full border bg-amber-50 text-amber-700 border-amber-200 font-mono tabular-nums whitespace-nowrap">
                 {streakDays} Day Streak 🔥
               </span>
             </div>
