@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: studentpulse-ai
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app
+    plan: free
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOWED_DOMAIN
+        value: kiet.edu
+      - key: ADMIN_EMAIL
+        value: faculty@kiet.edu
+      - key: ADMIN_PASSWORD
+        value: Faculty@KIET2024
+      - key: DATABASE_PATH
+        value: studentpulse.db
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
