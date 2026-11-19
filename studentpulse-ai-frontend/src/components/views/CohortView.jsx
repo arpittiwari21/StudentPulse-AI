@@ -51,7 +51,7 @@ export default function CohortView() {
 
   if (loading) {
     return (
-      <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen">
+      <div className="px-6 py-6 flex flex-col gap-6 bg-[#09090B] min-h-screen">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <div key={i} className="panel skeleton h-[120px] rounded-2xl" />
@@ -81,7 +81,7 @@ export default function CohortView() {
   const tierCounts = cohortData?.tier_distribution || {};
 
   return (
-    <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen">
+    <div className="px-6 py-6 flex flex-col gap-6 bg-[#09090B] min-h-screen">
       {/* KPI Cards Strip */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="panel p-5 rounded-2xl flex flex-col justify-between hover:border-[#00FF66]/40 transition-all">
@@ -198,7 +198,7 @@ export default function CohortView() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Student Candidate</th>
+                <th>Student Name</th>
                 <th>Roll Number</th>
                 <th>Target Role</th>
                 <th>Readiness Score</th>

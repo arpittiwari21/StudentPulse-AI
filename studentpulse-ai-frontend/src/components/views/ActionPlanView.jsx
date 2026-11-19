@@ -137,7 +137,7 @@ export default function ActionPlanView() {
 
   if (loading) {
     return (
-      <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen">
+      <div className="px-6 py-6 flex flex-col gap-6 bg-[#09090B] min-h-screen">
         <div className="panel skeleton h-[160px] rounded-2xl" />
         <div className="panel skeleton h-[420px] rounded-2xl" />
       </div>
@@ -147,7 +147,7 @@ export default function ActionPlanView() {
   const interviewQuestions = plan?.interview_questions || [];
 
   return (
-    <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen">
+    <div className="px-6 py-6 flex flex-col gap-6 bg-[#09090B] min-h-screen">
       {/* Top Action Bar */}
       <div className="panel p-6 rounded-2xl border-t-2 border-t-[#00FF66] bg-[#111114]">
         <div className="flex justify-between items-center flex-wrap gap-4">

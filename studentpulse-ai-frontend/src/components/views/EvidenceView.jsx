@@ -163,7 +163,7 @@ export default function EvidenceView() {
   };
 
   return (
-    <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen">
+    <div className="px-6 py-6 flex flex-col gap-6 bg-[#09090B] min-h-screen">
       {/* Sub-navigation & Header Controls */}
       <div className="flex justify-between items-center flex-wrap gap-4">
         <div className="inline-flex p-1 bg-[#111114] rounded-xl border border-[#222228]">

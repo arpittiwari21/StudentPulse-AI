@@ -12,6 +12,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
   const [showContextModal, setShowContextModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const tabTitles = {
@@ -28,7 +29,7 @@ export default function Dashboard() {
       subtitle: 'Adaptive milestone sprints and project-specific mock questions',
     },
     cohort: {
-      title: 'Faculty & Coordinator Cohort Analytics',
+      title: 'Cohort Analytics',
       subtitle: 'Candidate readiness tracking, tier filtering, and CSV export',
     },
   };
@@ -41,15 +42,24 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-[#09090B]">
-      {/* Fixed Left Sidebar */}
-      <Sidebar activeTab={activeTab} onSelectTab={setActiveTab} />
+      {/* Fixed Left Sidebar with Responsive Mobile Drawer */}
+      <Sidebar
+        activeTab={activeTab}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          setMobileMenuOpen(false);
+        }}
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
 
-      {/* Main Workspace Area */}
-      <div className="ml-[240px] flex-1 min-w-0 overflow-x-hidden flex flex-col bg-[#09090B]">
+      {/* Main Workspace Area: Properly Offset for Sidebar on Desktop (md:ml-64, ml-0 on mobile) */}
+      <div className="flex-1 min-w-0 flex flex-col md:ml-64 bg-[#09090B]">
         <Header
           title={currentTabInfo.title}
           subtitle={currentTabInfo.subtitle}
           onOpenContextModal={() => setShowContextModal(true)}
+          onToggleMobileMenu={() => setMobileMenuOpen(!mobileMenuOpen)}
         />
 
         <main className="flex-1 min-w-0 overflow-x-hidden bg-[#09090B]">

@@ -231,7 +231,7 @@ export default function OverviewView({ onNavigateTab }) {
 
   if (loading) {
     return (
-      <div className="p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen">
+      <div className="px-6 py-6 flex flex-col gap-6 bg-[#09090B] min-h-screen">
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="panel skeleton h-[120px] rounded-2xl" />
@@ -247,7 +247,7 @@ export default function OverviewView({ onNavigateTab }) {
 
   if (error) {
     return (
-      <div className="p-8 bg-[#09090B] min-h-screen">
+      <div className="px-6 py-6 bg-[#09090B] min-h-screen">
         <div className="p-5 bg-[#18181D] border border-red-500/30 rounded-2xl text-red-400">
           <p className="font-bold text-white mb-1">Could not load overview telemetry</p>
           <p className="text-sm m-0 text-red-300">{error}</p>
@@ -282,7 +282,7 @@ export default function OverviewView({ onNavigateTab }) {
   const dailyHours = user?.daily_hours || readiness?.daily_hours || 2;
 
   return (
-    <div className="p-6 lg:p-8 flex flex-col gap-6 bg-[#09090B] min-h-screen relative overflow-x-hidden">
+    <div className="px-6 py-6 flex flex-col gap-6 bg-[#09090B] min-h-screen relative overflow-x-hidden">
       {/* Subtle Ambient Radial Glow */}
       <div className="absolute top-0 left-1/4 w-[600px] h-[350px] bg-[radial-gradient(circle,rgba(0,255,102,0.04)_0%,transparent_70%)] pointer-events-none" />
 
