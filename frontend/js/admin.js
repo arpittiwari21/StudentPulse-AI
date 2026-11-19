@@ -1,6 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // frontend/js/admin.js
 // Faculty / Coordinator cohort analytics, skill-gap chart, CSV export
+// Institutional typography and layout design
 // ─────────────────────────────────────────────────────────────────────────────
 
 let cohortBarChart = null;
@@ -39,34 +40,36 @@ function renderCohortTable(students) {
   if (!tbody) return;
 
   if (!students.length) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400">No student data available.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-400 font-mono text-xs">No registered candidates in database.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = students.map(s => {
-    const tierClass = {
-      "Industry Ready": "bg-emerald-100 text-emerald-700",
-      "Developing": "bg-blue-100 text-blue-700",
-      "Needs Foundation": "bg-amber-100 text-amber-700",
-    }[s.readiness_tier] || "bg-slate-100 text-slate-600";
+    const tierBadge = {
+      "Industry Ready": "bg-emerald-50 text-emerald-800 border-emerald-200",
+      "Developing": "bg-blue-50 text-blue-800 border-blue-200",
+      "Needs Foundation": "bg-amber-50 text-amber-800 border-amber-200",
+    }[s.readiness_tier] || "bg-slate-50 text-slate-700 border-slate-200";
 
-    const scoreColor = s.overall_score >= 80 ? "text-emerald-600" :
-                       s.overall_score >= 60 ? "text-blue-600" : "text-amber-600";
+    const scoreColor = s.overall_score >= 80 ? "text-emerald-700" :
+                       s.overall_score >= 60 ? "text-blue-700" : "text-amber-700";
+
+    const barColor = s.overall_score >= 80 ? "bg-emerald-600" :
+                     s.overall_score >= 60 ? "bg-blue-600" : "bg-amber-500";
 
     return `
-      <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
-        <td class="px-4 py-3 font-medium text-slate-800">${s.name}</td>
-        <td class="px-4 py-3 text-slate-500 text-xs">${s.enrollment_no || "—"}</td>
-        <td class="px-4 py-3 text-slate-600">${s.target_role}</td>
-        <td class="px-4 py-3 font-bold ${scoreColor}">${s.overall_score}/100</td>
+      <tr class="hover:bg-slate-50/70 transition-colors">
+        <td class="px-4 py-3 font-semibold text-slate-900">${s.name}</td>
+        <td class="px-4 py-3 text-slate-500 font-mono text-[11px]">${s.enrollment_no || "—"}</td>
+        <td class="px-4 py-3 text-slate-700 font-medium">${s.target_role}</td>
+        <td class="px-4 py-3 font-mono font-bold ${scoreColor}">${s.overall_score}</td>
         <td class="px-4 py-3">
-          <span class="px-2 py-1 rounded-full text-xs font-semibold ${tierClass}">${s.readiness_tier}</span>
+          <span class="px-2 py-0.5 rounded border text-[10px] font-mono font-semibold ${tierBadge}">${s.readiness_tier}</span>
         </td>
-        <td class="px-4 py-3 text-slate-500 text-xs">${(s.missing_skills || []).slice(0, 3).join(", ") || "—"}</td>
+        <td class="px-4 py-3 text-slate-500 text-[11px] font-mono">${(s.missing_skills || []).slice(0, 3).join(", ") || "None"}</td>
         <td class="px-4 py-3">
-          <div class="w-full bg-slate-200 rounded-full h-2">
-            <div class="h-2 rounded-full ${s.overall_score >= 80 ? 'bg-emerald-500' : s.overall_score >= 60 ? 'bg-blue-500' : 'bg-amber-500'}"
-                 style="width:${s.overall_score}%"></div>
+          <div class="w-24 bg-slate-100 rounded-full h-1.5">
+            <div class="h-1.5 rounded-full ${barColor}" style="width:${s.overall_score}%"></div>
           </div>
         </td>
       </tr>`;
@@ -83,12 +86,12 @@ function renderSkillGapChart(data) {
     data: {
       labels: data.labels || [],
       datasets: [{
-        label: "Students Missing Skill",
+        label: "Candidates with skill deficit",
         data: data.counts || [],
-        backgroundColor: "rgba(99, 102, 241, 0.75)",
-        borderColor: "rgba(99, 102, 241, 1)",
+        backgroundColor: "rgba(37, 99, 235, 0.8)",
+        borderColor: "#2563eb",
         borderWidth: 1,
-        borderRadius: 6,
+        borderRadius: 4,
       }],
     },
     options: {
@@ -99,13 +102,20 @@ function renderSkillGapChart(data) {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (ctx) => ` ${ctx.raw} student${ctx.raw !== 1 ? "s" : ""} missing this skill`,
+            label: (ctx) => ` ${ctx.raw} candidate${ctx.raw !== 1 ? "s" : ""} require training in this skill`,
           },
         },
       },
       scales: {
-        x: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: "#f1f5f9" } },
-        y: { ticks: { font: { size: 11 } }, grid: { display: false } },
+        x: {
+          beginAtZero: true,
+          ticks: { stepSize: 1, font: { family: "'JetBrains Mono', monospace", size: 10 } },
+          grid: { color: "#f1f5f9" }
+        },
+        y: {
+          ticks: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 10, weight: 500 } },
+          grid: { display: false }
+        },
       },
     },
   });
@@ -118,7 +128,7 @@ function renderRoleDistributionChart(roleData) {
 
   const labels = Object.keys(roleData);
   const values = Object.values(roleData);
-  const colors = ["#6366f1", "#10b981", "#f59e0b", "#ef4444"];
+  const colors = ["#2563eb", "#059669", "#d97706", "#475569"];
 
   cohortBarChart = new Chart(ctx, {
     type: "doughnut",
@@ -128,14 +138,21 @@ function renderRoleDistributionChart(roleData) {
         data: values,
         backgroundColor: colors,
         borderWidth: 2,
-        borderColor: "#fff",
+        borderColor: "#ffffff",
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: "right", labels: { font: { size: 11 }, boxWidth: 12 } },
+        legend: {
+          position: "bottom",
+          labels: {
+            font: { family: "'Plus Jakarta Sans', sans-serif", size: 10, weight: 600 },
+            boxWidth: 10,
+            padding: 8
+          }
+        },
       },
     },
   });

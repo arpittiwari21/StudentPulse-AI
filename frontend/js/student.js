@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // frontend/js/student.js
 // 4-view Student SPA: Profile, Evidence, AI Plan, Progress
-// Editable roadmap, flashcard carousel, Chart.js radar + bar charts
+// Refactored per frontend-design guidance for distinctive institutional UX
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -37,7 +37,7 @@ async function handleLogin(e) {
   e.preventDefault();
   const btn = document.getElementById("login-btn");
   btn.disabled = true;
-  btn.textContent = "Signing in…";
+  btn.textContent = "Verifying…";
   try {
     const data = await API.login({
       email: document.getElementById("login-email").value,
@@ -49,7 +49,7 @@ async function handleLogin(e) {
     showError(err.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = "Sign In";
+    btn.textContent = "Sign in";
   }
 }
 
@@ -57,7 +57,7 @@ async function handleRegister(e) {
   e.preventDefault();
   const btn = document.getElementById("register-btn");
   btn.disabled = true;
-  btn.textContent = "Creating account…";
+  btn.textContent = "Registering…";
   try {
     const data = await API.register({
       name: document.getElementById("reg-name").value,
@@ -66,13 +66,13 @@ async function handleRegister(e) {
       password: document.getElementById("reg-password").value,
     });
     setSession(data);
-    showSuccess("Account created! Welcome to StudentPulse AI.");
+    showSuccess("Account registered successfully.");
     postLoginRedirect();
   } catch (err) {
     showError(err.message);
   } finally {
     btn.disabled = false;
-    btn.textContent = "Create Account";
+    btn.textContent = "Complete registration";
   }
 }
 
@@ -83,7 +83,7 @@ async function demoLogin(role) {
   try {
     const data = await API.login(credentials);
     setSession(data);
-    showSuccess(`Demo login as ${data.name} ✓`);
+    showSuccess(`Signed in as ${data.name}`);
     postLoginRedirect();
   } catch (err) {
     showError(err.message);
@@ -99,7 +99,7 @@ function handleLogout() {
   clearSession();
   updateNavForUser();
   showView("home");
-  showSuccess("Logged out successfully.");
+  showSuccess("Signed out.");
 }
 
 function updateNavForUser() {
@@ -129,7 +129,14 @@ async function loadProfileView() {
     document.getElementById("ctx-focus").value = user.focus_area || "Projects";
     document.getElementById("profile-name").textContent = user.name;
     document.getElementById("profile-email").textContent = user.email;
-    document.getElementById("profile-enrollment").textContent = user.enrollment_no || "—";
+    document.getElementById("profile-enrollment").textContent = user.enrollment_no ? `ID: ${user.enrollment_no}` : "Student Candidate";
+
+    // Set initials monogram
+    const initials = user.name
+      ? user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
+      : "ST";
+    const initialsEl = document.getElementById("profile-initials");
+    if (initialsEl) initialsEl.textContent = initials;
 
     // Load all evidence in parallel
     const [assessments, projects, certs] = await Promise.all([
@@ -153,7 +160,7 @@ async function saveContext(e) {
       daily_hours: parseFloat(document.getElementById("ctx-hours").value),
       focus_area: document.getElementById("ctx-focus").value,
     });
-    showSuccess("Learning context saved ✓");
+    showSuccess("Learning context updated.");
   } catch (err) {
     showError(err.message);
   }
@@ -163,22 +170,29 @@ async function saveContext(e) {
 function renderAssessments(list) {
   const el = document.getElementById("assessment-list");
   if (!el) return;
-  el.innerHTML = list.length ? list.map(a => `
-    <div class="evidence-card flex items-center justify-between gap-2 bg-white rounded-xl p-3 shadow-sm border border-slate-100">
+  el.innerHTML = list.length ? list.map(a => {
+    const pct = Math.round((a.score / a.max_score) * 100);
+    const scoreColor = pct >= 75 ? "text-emerald-700 bg-emerald-50 border-emerald-200" :
+                       pct >= 60 ? "text-blue-700 bg-blue-50 border-blue-200" :
+                       "text-amber-700 bg-amber-50 border-amber-200";
+
+    return `
+    <div class="evidence-card flex items-center justify-between gap-3 bg-white rounded-lg p-2.5 border border-slate-200">
       <div class="flex-1 min-w-0">
-        <p class="font-medium text-slate-800 truncate">${a.subject}</p>
-        <p class="text-xs text-slate-400 mt-0.5">${a.type} · ${a.score}/${a.max_score}</p>
+        <p class="font-semibold text-xs text-slate-900 truncate">${a.subject}</p>
+        <p class="text-[11px] text-slate-500 font-mono mt-0.5">${a.type} · ${a.score}/${a.max_score}</p>
       </div>
       <div class="flex items-center gap-2">
-        <span class="text-sm font-bold ${(a.score/a.max_score)*100 >= 70 ? 'text-emerald-600' : 'text-amber-500'}">
-          ${Math.round((a.score/a.max_score)*100)}%
+        <span class="text-xs font-mono font-bold px-2 py-0.5 rounded border ${scoreColor}">
+          ${pct}%
         </span>
-        <button onclick="deleteAssessment(${a.id})" class="text-slate-300 hover:text-red-400 transition-colors">
-          <i data-lucide="trash-2" class="w-4 h-4"></i>
+        <button onclick="deleteAssessment(${a.id})" title="Delete assessment" class="text-slate-400 hover:text-red-500 transition-colors p-1">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
         </button>
       </div>
-    </div>`).join("") :
-    `<p class="text-slate-400 text-sm text-center py-4">No assessments recorded yet.</p>`;
+    </div>`;
+  }).join("") :
+  `<p class="text-slate-400 text-xs text-center py-4 font-mono">No assessments recorded in ledger.</p>`;
   if (window.lucide) lucide.createIcons();
 }
 
@@ -192,8 +206,9 @@ async function addAssessment(e) {
       type: document.getElementById("a-type").value,
     });
     e.target.reset();
+    document.getElementById("a-max").value = "100";
     renderAssessments(await API.getAssessments());
-    showSuccess("Assessment recorded ✓");
+    showSuccess("Assessment recorded.");
   } catch (err) { showError(err.message); }
 }
 
@@ -208,26 +223,34 @@ async function deleteAssessment(id) {
 function renderProjects(list) {
   const el = document.getElementById("project-list");
   if (!el) return;
-  const complexityColor = { Beginner: "bg-slate-100 text-slate-600", Intermediate: "bg-blue-100 text-blue-600", Advanced: "bg-purple-100 text-purple-600" };
+  const complexityBadge = {
+    Beginner: "bg-slate-100 text-slate-700 border-slate-200",
+    Intermediate: "bg-blue-50 text-blue-700 border-blue-200",
+    Advanced: "bg-purple-50 text-purple-700 border-purple-200"
+  };
+
   el.innerHTML = list.length ? list.map(p => `
-    <div class="evidence-card bg-white rounded-xl p-3 shadow-sm border border-slate-100">
+    <div class="evidence-card bg-white rounded-lg p-3 border border-slate-200 space-y-2">
       <div class="flex items-start justify-between gap-2">
         <div class="flex-1 min-w-0">
-          <p class="font-medium text-slate-800 truncate">${p.title}</p>
-          <p class="text-xs text-slate-400 mt-0.5 line-clamp-2">${p.description || ""}</p>
+          <div class="flex items-center gap-2">
+            <p class="font-semibold text-xs text-slate-900 truncate">${p.title}</p>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded border font-semibold ${complexityBadge[p.complexity] || "bg-slate-100 text-slate-700 border-slate-200"}">${p.complexity}</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1 line-clamp-2 leading-relaxed">${p.description || "No description provided."}</p>
           <div class="flex flex-wrap gap-1 mt-2">
-            ${p.tech_stack ? p.tech_stack.split(",").map(t => `<span class="px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded text-xs">${t.trim()}</span>`).join("") : ""}
+            ${p.tech_stack ? p.tech_stack.split(",").map(t => `<span class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded text-[10px] font-mono font-medium">${t.trim()}</span>`).join("") : ""}
           </div>
         </div>
-        <div class="flex flex-col items-end gap-1 shrink-0">
-          <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${complexityColor[p.complexity] || "bg-slate-100 text-slate-600"}">${p.complexity}</span>
-          <button onclick="deleteProject(${p.id})" class="text-slate-300 hover:text-red-400 transition-colors mt-1">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
+        <div class="flex items-center gap-1.5 shrink-0 ml-2">
+          ${p.github_url ? `<a href="${p.github_url}" target="_blank" rel="noopener" class="text-slate-400 hover:text-slate-700 p-1" title="View repository"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>` : ""}
+          <button onclick="deleteProject(${p.id})" title="Delete project" class="text-slate-400 hover:text-red-500 transition-colors p-1">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
           </button>
         </div>
       </div>
     </div>`).join("") :
-    `<p class="text-slate-400 text-sm text-center py-4">No projects added yet.</p>`;
+  `<p class="text-slate-400 text-xs text-center py-4 font-mono">No project evidence recorded yet.</p>`;
   if (window.lucide) lucide.createIcons();
 }
 
@@ -243,7 +266,7 @@ async function addProject(e) {
     });
     e.target.reset();
     renderProjects(await API.getProjects());
-    showSuccess("Project added ✓");
+    showSuccess("Project deliverable documented.");
   } catch (err) { showError(err.message); }
 }
 
@@ -258,18 +281,20 @@ async function deleteProject(id) {
 function renderCerts(list) {
   const el = document.getElementById("cert-list");
   if (!el) return;
-  const typeIcon = { certification: "🏅", hackathon: "🏆", course: "📚" };
   el.innerHTML = list.length ? list.map(c => `
-    <div class="evidence-card flex items-center justify-between gap-2 bg-white rounded-xl p-3 shadow-sm border border-slate-100">
+    <div class="evidence-card flex items-center justify-between gap-3 bg-white rounded-lg p-2.5 border border-slate-200">
       <div class="flex-1 min-w-0">
-        <p class="font-medium text-slate-800 truncate">${typeIcon[c.type] || "🏅"} ${c.title}</p>
-        <p class="text-xs text-slate-400 mt-0.5">${c.issuer || ""} ${c.issued_date ? "· " + c.issued_date : ""}</p>
+        <div class="flex items-center gap-2">
+          <p class="font-semibold text-xs text-slate-900 truncate">${c.title}</p>
+          <span class="text-[10px] font-mono px-1.5 py-0.2 bg-slate-100 text-slate-600 rounded border border-slate-200">${c.type}</span>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-0.5 font-mono">${c.issuer || "Verified"}${c.issued_date ? " · " + c.issued_date : ""}</p>
       </div>
-      <button onclick="deleteCert(${c.id})" class="text-slate-300 hover:text-red-400 transition-colors shrink-0">
-        <i data-lucide="trash-2" class="w-4 h-4"></i>
+      <button onclick="deleteCert(${c.id})" title="Delete certification" class="text-slate-400 hover:text-red-500 transition-colors p-1 shrink-0">
+        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
       </button>
     </div>`).join("") :
-    `<p class="text-slate-400 text-sm text-center py-4">No certifications added yet.</p>`;
+  `<p class="text-slate-400 text-xs text-center py-4 font-mono">No external credentials recorded.</p>`;
   if (window.lucide) lucide.createIcons();
 }
 
@@ -284,7 +309,7 @@ async function addCert(e) {
     });
     e.target.reset();
     renderCerts(await API.getCerts());
-    showSuccess("Certification added ✓");
+    showSuccess("Credential documented.");
   } catch (err) { showError(err.message); }
 }
 
@@ -315,7 +340,7 @@ async function loadPlanView() {
       renderFlashcard();
       document.getElementById("ai-source-badge").textContent = "Saved Plan";
     } else {
-      document.getElementById("ai-diagnosis").textContent = "Click 'Generate AI Plan' to get your personalised readiness diagnosis and 90-day action plan.";
+      document.getElementById("ai-diagnosis").textContent = "Select 'Regenerate AI plan' above to trigger hybrid diagnostic evaluation and build your 90-day action plan.";
       renderMilestones([]);
     }
     document.getElementById("plan-loading").classList.add("hidden");
@@ -329,7 +354,7 @@ async function loadPlanView() {
 async function generatePlan() {
   const btn = document.getElementById("generate-plan-btn");
   btn.disabled = true;
-  btn.innerHTML = `<svg class="animate-spin w-4 h-4 inline mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83"/></svg>Generating…`;
+  btn.innerHTML = `<svg class="animate-spin w-3.5 h-3.5 inline mr-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83"/></svg>Computing…`;
   document.getElementById("plan-loading").classList.remove("hidden");
   document.getElementById("plan-content").classList.add("hidden");
 
@@ -343,17 +368,22 @@ async function generatePlan() {
     flashcards = res.interview_questions || [];
     flashcardIndex = 0;
     renderFlashcard();
-    const sourceLabels = { "gemini-4-hydrogen": "Gemini 4 Hydrogen", "agy-agent": "AGY Agent", "groq": "Groq AI", "offline_fallback": "Offline Engine" };
+    const sourceLabels = {
+      "gemini-4-hydrogen": "Gemini 4 Hydrogen",
+      "agy-agent": "Antigravity Agent",
+      "groq": "Groq LLaMA-3",
+      "offline_fallback": "Offline Deterministic"
+    };
     document.getElementById("ai-source-badge").textContent = sourceLabels[res.ai_source] || res.ai_source;
     document.getElementById("plan-loading").classList.add("hidden");
     document.getElementById("plan-content").classList.remove("hidden");
-    showSuccess("AI plan generated ✓");
+    showSuccess("Plan generated and saved.");
   } catch (err) {
     showError(err.message);
     document.getElementById("plan-loading").classList.add("hidden");
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<i data-lucide="zap" class="w-4 h-4 inline mr-1"></i> Generate AI Plan`;
+    btn.innerHTML = `<i data-lucide="refresh-cw" class="w-3.5 h-3.5 inline mr-1.5"></i> Regenerate AI plan`;
     if (window.lucide) lucide.createIcons();
   }
 }
@@ -363,7 +393,7 @@ function flattenTasks(actionPlan, planId) {
   (actionPlan || []).forEach(m => {
     (m.tasks || []).forEach((t, i) => {
       tasks.push({
-        id: null, // DB IDs loaded on getPlan()
+        id: null,
         plan_id: planId,
         milestone: m.milestone,
         title: t.title,
@@ -382,26 +412,27 @@ function renderReadinessScore(report) {
   if (!report) return;
   const score = report.overall_score || 0;
   document.getElementById("score-value").textContent = score.toFixed(1);
-  document.getElementById("score-tier").textContent = report.readiness_tier || "";
+  
+  const tierEl = document.getElementById("score-tier");
+  tierEl.textContent = report.readiness_tier || "";
+  tierEl.className = {
+    "Industry Ready": "font-mono text-xs font-bold px-2 py-0.5 rounded border border-emerald-300 bg-emerald-50 text-emerald-800",
+    "Developing": "font-mono text-xs font-bold px-2 py-0.5 rounded border border-blue-300 bg-blue-50 text-blue-800",
+    "Needs Foundation": "font-mono text-xs font-bold px-2 py-0.5 rounded border border-amber-300 bg-amber-50 text-amber-800",
+  }[report.readiness_tier] || "font-mono text-xs font-bold px-2 py-0.5 rounded border border-slate-300 bg-slate-50 text-slate-800";
+
   document.getElementById("score-academic").textContent = `${report.academic_index?.toFixed(0)}%`;
   document.getElementById("score-skill").textContent = `${report.skill_index?.toFixed(0)}%`;
   document.getElementById("score-evidence").textContent = `${report.evidence_index?.toFixed(0)}%`;
   document.getElementById("score-match-pct").textContent = `${report.skill_match_pct || 0}%`;
 
-  const tierEl = document.getElementById("score-tier");
-  tierEl.className = {
-    "Industry Ready": "text-emerald-600 font-bold text-lg",
-    "Developing": "text-blue-600 font-bold text-lg",
-    "Needs Foundation": "text-amber-600 font-bold text-lg",
-  }[report.readiness_tier] || "font-bold text-lg";
-
-  // Skill chips
+  // Matched and Missing skill tags
   const matchEl = document.getElementById("matched-skills");
   const missEl = document.getElementById("missing-skills");
-  if (matchEl) matchEl.innerHTML = (report.matched_skills || []).slice(0, 10).map(s =>
-    `<span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">${s}</span>`).join("");
-  if (missEl) missEl.innerHTML = (report.missing_skills || []).slice(0, 10).map(s =>
-    `<span class="px-2 py-1 bg-red-100 text-red-600 rounded-full text-xs font-medium">${s}</span>`).join("");
+  if (matchEl) matchEl.innerHTML = (report.matched_skills || []).slice(0, 12).map(s =>
+    `<span class="px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded text-[11px] font-mono">${s}</span>`).join("");
+  if (missEl) missEl.innerHTML = (report.missing_skills || []).slice(0, 12).map(s =>
+    `<span class="px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-900 rounded text-[11px] font-mono">${s}</span>`).join("");
 }
 
 function renderRadarChart(radar) {
@@ -414,28 +445,45 @@ function renderRadarChart(radar) {
     data: {
       labels: radar.labels || [],
       datasets: [{
-        label: "Your Profile",
+        label: "Candidate profile",
         data: radar.scores || [],
-        backgroundColor: "rgba(99, 102, 241, 0.15)",
-        borderColor: "rgba(99, 102, 241, 1)",
-        pointBackgroundColor: "rgba(99, 102, 241, 1)",
-        pointBorderColor: "#fff",
-        pointHoverBackgroundColor: "#fff",
-        pointHoverBorderColor: "rgba(99, 102, 241, 1)",
+        backgroundColor: "rgba(37, 99, 235, 0.12)",
+        borderColor: "#2563eb",
+        pointBackgroundColor: "#2563eb",
+        pointBorderColor: "#ffffff",
+        pointHoverBackgroundColor: "#ffffff",
+        pointHoverBorderColor: "#2563eb",
         borderWidth: 2,
-        pointRadius: 5,
+        pointRadius: 4,
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => ` ${context.dataset.label}: ${context.raw}%`
+          }
+        }
+      },
       scales: {
         r: {
-          min: 0, max: 100, beginAtZero: true,
-          ticks: { stepSize: 20, font: { size: 10 } },
+          min: 0,
+          max: 100,
+          beginAtZero: true,
+          ticks: {
+            stepSize: 25,
+            font: { family: "'JetBrains Mono', monospace", size: 9 },
+            backdropColor: 'transparent',
+            color: '#94a3b8'
+          },
           grid: { color: "#e2e8f0" },
-          pointLabels: { font: { size: 11 } },
+          pointLabels: {
+            font: { family: "'Plus Jakarta Sans', sans-serif", size: 10, weight: 600 },
+            color: '#475569'
+          },
         },
       },
     },
@@ -448,69 +496,74 @@ function renderMilestones(tasks) {
   if (!container) return;
 
   if (!tasks.length) {
-    container.innerHTML = `<div class="text-center py-12 text-slate-400"><p class="text-lg font-medium">No plan yet</p><p class="text-sm mt-1">Generate your AI plan to see your personalised 90-day roadmap.</p></div>`;
+    container.innerHTML = `<div class="text-center py-10 text-slate-400 font-mono text-xs col-span-2">No active action plan loaded. Select "Regenerate AI plan" to build milestones.</div>`;
     return;
   }
 
   const byMilestone = { 1: [], 2: [], 3: [], 4: [] };
   tasks.forEach(t => { if (byMilestone[t.milestone]) byMilestone[t.milestone].push(t); });
 
-  const milestoneNames = ["Foundation Sprint", "Core Skills Build", "Advanced Application", "Interview Ready"];
-  const milestoneColors = [
-    "border-indigo-400 bg-indigo-50",
-    "border-blue-400 bg-blue-50",
-    "border-purple-400 bg-purple-50",
-    "border-emerald-400 bg-emerald-50",
+  const phaseNames = [
+    "Phase 1: Foundation & Core Gaps",
+    "Phase 2: Full-Stack Architecture",
+    "Phase 3: Deep Systems & Evidence",
+    "Phase 4: Interview & Placement Sprint"
   ];
-  const priorityBadge = {
-    High: "bg-red-100 text-red-600",
-    Medium: "bg-amber-100 text-amber-600",
-    Low: "bg-slate-100 text-slate-500",
+
+  const priorityStyles = {
+    High: "bg-red-50 text-red-700 border-red-200",
+    Medium: "bg-slate-50 text-slate-700 border-slate-200",
+    Low: "bg-slate-50 text-slate-500 border-slate-200",
   };
 
   container.innerHTML = [1, 2, 3, 4].map(m => {
     const mTasks = byMilestone[m];
     const done = mTasks.filter(t => t.completed).length;
     const pct = mTasks.length ? Math.round((done / mTasks.length) * 100) : 0;
+    
     return `
-    <div class="milestone-card border-l-4 ${milestoneColors[m - 1]} rounded-xl p-4 shadow-sm">
-      <div class="flex items-center justify-between mb-3">
-        <div>
-          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Milestone ${m}</span>
-          <h4 class="font-semibold text-slate-700 mt-0.5">${milestoneNames[m - 1]}</h4>
-        </div>
-        <div class="text-right">
-          <span class="text-sm font-bold text-slate-600">${done}/${mTasks.length} done</span>
-          <div class="w-20 bg-slate-200 rounded-full h-1.5 mt-1">
-            <div class="h-1.5 rounded-full bg-indigo-500" style="width:${pct}%"></div>
+    <div class="border border-slate-200 rounded-xl p-4 bg-white flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <span class="text-[10px] font-mono text-slate-400 uppercase tracking-tight">Milestone ${m} of 4</span>
+            <h4 class="font-bold text-xs text-slate-900 mt-0.5">${phaseNames[m - 1]}</h4>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-mono font-semibold text-slate-700">${done}/${mTasks.length}</span>
+            <div class="w-16 bg-slate-100 rounded-full h-1 mt-1">
+              <div class="h-1 rounded-full bg-blue-600" style="width:${pct}%"></div>
+            </div>
           </div>
         </div>
+
+        <div class="space-y-2 mt-3">
+          ${mTasks.map(t => `
+            <div class="task-row flex items-start gap-2.5 p-2 rounded-lg border border-slate-100 group" id="task-${t.id}">
+              <input type="checkbox" ${t.completed ? "checked" : ""}
+                onchange="toggleTask(${t.id}, this.checked)"
+                class="mt-0.5 w-3.5 h-3.5 rounded text-blue-600 accent-blue-600 cursor-pointer shrink-0">
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-slate-800 ${t.completed ? 'line-through text-slate-400' : ''} task-title leading-snug">${t.title}</p>
+                <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">${t.description || ""}</p>
+                ${t.target_date ? `<p class="text-[10px] font-mono text-slate-400 mt-1">Target: ${t.target_date}</p>` : ""}
+              </div>
+              <div class="flex items-center gap-1 shrink-0 ml-1">
+                <span class="px-1.5 py-0.2 rounded border text-[10px] font-mono font-semibold ${priorityStyles[t.priority] || 'bg-slate-50 text-slate-600 border-slate-200'}">${t.priority}</span>
+                <button onclick="openEditTask(${t.id})" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-slate-800 transition-opacity p-0.5" title="Edit task">
+                  <i data-lucide="pencil" class="w-3 h-3"></i>
+                </button>
+                <button onclick="deleteTask(${t.id})" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-opacity p-0.5" title="Delete task">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i>
+                </button>
+              </div>
+            </div>`).join("")}
+        </div>
       </div>
-      <div class="space-y-2">
-        ${mTasks.map(t => `
-          <div class="task-row flex items-start gap-3 bg-white rounded-lg p-2.5 shadow-xs border border-slate-100 group" id="task-${t.id}">
-            <input type="checkbox" ${t.completed ? "checked" : ""}
-              onchange="toggleTask(${t.id}, this.checked)"
-              class="mt-0.5 w-4 h-4 rounded accent-indigo-500 cursor-pointer shrink-0">
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-slate-700 ${t.completed ? 'line-through text-slate-400' : ''} task-title">${t.title}</p>
-              <p class="text-xs text-slate-400 mt-0.5 line-clamp-2">${t.description || ""}</p>
-              ${t.target_date ? `<p class="text-xs text-slate-300 mt-1">📅 Due: ${t.target_date}</p>` : ""}
-            </div>
-            <div class="flex items-center gap-1 shrink-0">
-              <span class="px-1.5 py-0.5 rounded text-xs font-semibold ${priorityBadge[t.priority] || 'bg-slate-100 text-slate-500'}">${t.priority}</span>
-              <button onclick="openEditTask(${t.id})" class="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-indigo-500 transition-all">
-                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-              </button>
-              <button onclick="deleteTask(${t.id})" class="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400 transition-all">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-          </div>`).join("")}
-      </div>
+
       <button onclick="showAddTaskModal(${m})"
-        class="mt-3 w-full text-sm text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg py-2 border border-dashed border-indigo-200 transition-colors flex items-center justify-center gap-1">
-        <i data-lucide="plus" class="w-4 h-4"></i> Add Custom Task
+        class="mt-3 w-full text-xs text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg py-1.5 border border-dashed border-slate-300 transition-colors flex items-center justify-center gap-1 font-medium">
+        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Append task
       </button>
     </div>`;
   }).join("");
@@ -524,16 +577,16 @@ async function toggleTask(id, completed) {
     await API.updateTask(id, { completed });
     const titleEl = document.querySelector(`#task-${id} .task-title`);
     if (titleEl) titleEl.classList.toggle("line-through", completed);
-    if (completed) showSuccess("Task completed! 🎉");
+    if (completed) showSuccess("Task marked complete.");
   } catch (err) { showError(err.message); }
 }
 
 async function deleteTask(id) {
-  if (!id || !confirm("Delete this task?")) return;
+  if (!id || !confirm("Delete this plan task?")) return;
   try {
     await API.deleteTask(id);
     document.getElementById(`task-${id}`)?.remove();
-    showSuccess("Task removed.");
+    showSuccess("Task deleted.");
   } catch (err) { showError(err.message); }
 }
 
@@ -550,7 +603,7 @@ function hideAddTaskModal() {
 async function submitAddTask(e) {
   e.preventDefault();
   try {
-    const res = await API.addTask({
+    await API.addTask({
       milestone: parseInt(document.getElementById("modal-milestone").value),
       title: document.getElementById("modal-task-title").value,
       description: document.getElementById("modal-task-desc").value,
@@ -558,10 +611,9 @@ async function submitAddTask(e) {
       target_date: document.getElementById("modal-task-date").value,
     });
     hideAddTaskModal();
-    // Reload tasks
     const planRes = await API.getPlan();
     renderMilestones(planRes.tasks || []);
-    showSuccess("Custom task added ✓");
+    showSuccess("Task added to milestone.");
   } catch (err) { showError(err.message); }
 }
 
@@ -590,7 +642,7 @@ async function submitEditTask(e) {
     hideEditTaskModal();
     const planRes = await API.getPlan();
     renderMilestones(planRes.tasks || []);
-    showSuccess("Task updated ✓");
+    showSuccess("Task updated.");
   } catch (err) { showError(err.message); }
 }
 
@@ -600,13 +652,12 @@ function renderFlashcard() {
   const counter = document.getElementById("flashcard-counter");
   if (!el) return;
   if (!flashcards.length) {
-    el.textContent = "Generate your AI plan to unlock personalised interview questions.";
+    el.textContent = "Generate your AI plan to unlock role-specific interview rehearsal questions.";
     if (counter) counter.textContent = "";
     return;
   }
   el.textContent = flashcards[flashcardIndex];
   if (counter) counter.textContent = `${flashcardIndex + 1} / ${flashcards.length}`;
-  // Flip animation reset
   const card = document.getElementById("flashcard");
   if (card) { card.classList.remove("flipped"); }
 }
@@ -631,15 +682,8 @@ async function loadProgressView() {
     const data = await API.getProgress();
     document.getElementById("streak-count").textContent = data.streak;
     document.getElementById("active-days").textContent = data.active_days;
-    document.getElementById("tasks-done").textContent = `${data.completed_tasks}/${data.total_tasks}`;
+    document.getElementById("tasks-done").textContent = `${data.completed_tasks} / ${data.total_tasks}`;
     document.getElementById("completion-pct").textContent = `${data.completion_pct}%`;
-
-    // Completion progress ring
-    const ring = document.getElementById("completion-ring");
-    if (ring) {
-      const pct = data.completion_pct || 0;
-      ring.style.background = `conic-gradient(#6366f1 ${pct * 3.6}deg, #e2e8f0 0deg)`;
-    }
 
     renderWeeklyChart(data.weekly_data || []);
     renderScoreChart(data.score_history || []);
@@ -663,21 +707,35 @@ function renderWeeklyChart(weeklyData) {
     data: {
       labels,
       datasets: [{
-        label: "Tasks Completed",
+        label: "Deliverables Completed",
         data: weeklyData.map(d => d.tasks_done),
         backgroundColor: weeklyData.map(d =>
-          d.tasks_done > 0 ? "rgba(99, 102, 241, 0.8)" : "rgba(226, 232, 240, 0.8)"),
-        borderRadius: 8,
+          d.tasks_done > 0 ? "#2563eb" : "#e2e8f0"),
+        borderRadius: 4,
         borderSkipped: false,
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => ` ${context.raw} deliverables completed`
+          }
+        }
+      },
       scales: {
-        y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: "#f1f5f9" } },
-        x: { grid: { display: false } },
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1, font: { family: "'JetBrains Mono', monospace", size: 10 } },
+          grid: { color: "#f1f5f9" }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 } }
+        },
       },
     },
   });
@@ -693,23 +751,40 @@ function renderScoreChart(history) {
     data: {
       labels: history.map(h => h.date),
       datasets: [{
-        label: "Readiness Score",
+        label: "Readiness Index",
         data: history.map(h => h.score),
-        borderColor: "#6366f1",
-        backgroundColor: "rgba(99, 102, 241, 0.08)",
+        borderColor: "#2563eb",
+        backgroundColor: "rgba(37, 99, 235, 0.05)",
         fill: true,
-        tension: 0.4,
-        pointBackgroundColor: "#6366f1",
+        tension: 0.3,
+        borderWidth: 2,
+        pointBackgroundColor: "#2563eb",
+        pointBorderColor: "#ffffff",
         pointRadius: 3,
       }],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => ` Readiness: ${context.raw}%`
+          }
+        }
+      },
       scales: {
-        y: { min: 0, max: 100, grid: { color: "#f1f5f9" } },
-        x: { ticks: { maxTicksLimit: 10 }, grid: { display: false } },
+        y: {
+          min: 0,
+          max: 100,
+          ticks: { font: { family: "'JetBrains Mono', monospace", size: 10 } },
+          grid: { color: "#f1f5f9" }
+        },
+        x: {
+          ticks: { maxTicksLimit: 8, font: { family: "'JetBrains Mono', monospace", size: 10 } },
+          grid: { display: false }
+        },
       },
     },
   });

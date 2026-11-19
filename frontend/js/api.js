@@ -34,11 +34,11 @@ function getUserName() {
 
 // Human-readable HTTP error messages
 const ERROR_MESSAGES = {
-  400: "Invalid input — please check your details.",
-  401: "Session expired. Please log in again.",
-  403: "You don't have permission to do that.",
-  404: "Resource not found.",
-  500: "Server error. Please try again shortly.",
+  400: "Invalid input. Please check the provided values.",
+  401: "Session expired or invalid credentials. Please sign in again.",
+  403: "Access restricted. Institutional permission required.",
+  404: "Requested record not found.",
+  500: "Server error occurred. Please try again shortly.",
 };
 
 async function apiFetch(endpoint, options = {}) {
@@ -59,7 +59,7 @@ async function apiFetch(endpoint, options = {}) {
     if (res.status === 401) {
       clearSession();
       window.dispatchEvent(new CustomEvent("sp:logout"));
-      throw new Error("Session expired. Please log in again.");
+      throw new Error("Session expired. Please sign in again.");
     }
 
     const contentType = res.headers.get("content-type") || "";
@@ -67,14 +67,14 @@ async function apiFetch(endpoint, options = {}) {
     const data = isJson ? await res.json() : await res.text();
 
     if (!res.ok) {
-      const msg = (isJson && data.error) ? data.error : (ERROR_MESSAGES[res.status] || `Error ${res.status}`);
+      const msg = (isJson && data.error) ? data.error : (ERROR_MESSAGES[res.status] || `Request error (${res.status})`);
       throw new Error(msg);
     }
 
     return data;
   } catch (err) {
     if (err.name === "TypeError") {
-      throw new Error("Cannot connect to server. Please check your connection.");
+      throw new Error("Unable to connect to service. Verify the server is running.");
     }
     throw err;
   }
@@ -118,17 +118,19 @@ const API = {
   exportCSV: () => `${API_BASE}/admin/export-csv`,
 };
 
-// Global error banner utility
+// Global feedback banner matching design system
 function showBanner(msg, type = "error") {
   const banner = document.getElementById("global-banner");
   if (!banner) return;
   banner.textContent = msg;
-  banner.className = `fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg text-sm font-medium transition-all duration-300 ${
-    type === "error" ? "bg-red-500 text-white" : "bg-emerald-500 text-white"
+  banner.className = `fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg shadow-sm text-xs font-semibold border transition-all duration-200 ${
+    type === "error" 
+      ? "bg-red-50 text-red-800 border-red-200" 
+      : "bg-emerald-50 text-emerald-900 border-emerald-200"
   }`;
   banner.classList.remove("hidden");
   clearTimeout(banner._timer);
-  banner._timer = setTimeout(() => banner.classList.add("hidden"), 4500);
+  banner._timer = setTimeout(() => banner.classList.add("hidden"), 3500);
 }
 
 function showSuccess(msg) { showBanner(msg, "success"); }

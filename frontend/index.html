@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth antialiased">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudentPulse AI — KIET Career Readiness Platform</title>
-  <meta name="description" content="AI-Powered Student Success, Skill-Gap Analysis & Career Readiness Platform for KIET Group of Institutions" />
+  <title>StudentPulse AI — KIET Career Readiness & Placement Platform</title>
+  <meta name="description" content="Technical career readiness workbench, skill-gap diagnostic engine, and placement action roadmap for KIET Group of Institutions." />
+
+  <!-- Typography: Plus Jakarta Sans for UI + JetBrains Mono for metrics -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -17,8 +22,27 @@
     tailwind.config = {
       theme: {
         extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+          },
           colors: {
-            brand: { 50: "#f0f0ff", 500: "#6366f1", 600: "#4f46e5", 700: "#4338ca" }
+            cobalt: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            surface: {
+              subtle: '#f8fafc',
+              card: '#ffffff',
+              border: '#e2e8f0',
+              hover: '#f1f5f9',
+            }
           }
         }
       }
@@ -26,272 +50,394 @@
   </script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    * { font-family: 'Inter', sans-serif; }
-
-    .sp-view { animation: fadeIn 0.25s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-    .nav-active { color: #6366f1 !important; border-bottom: 2px solid #6366f1; }
-
-    .gradient-hero {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.3);
+    body {
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      background-color: #f8fafc;
+      color: #0f172a;
     }
 
-    /* Flashcard flip */
-    .flashcard-wrapper { perspective: 1000px; }
+    /* Screen transition */
+    .sp-view {
+      animation: viewFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes viewFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Navigation active state */
+    .nav-active {
+      color: #1d4ed8 !important;
+      border-bottom: 2px solid #2563eb !important;
+      font-weight: 600;
+    }
+
+    /* Tactile flashcard mechanics */
+    .flashcard-wrapper {
+      perspective: 1200px;
+    }
     #flashcard {
-      transition: transform 0.5s ease;
+      transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
       transform-style: preserve-3d;
       cursor: pointer;
     }
-    #flashcard.flipped { transform: rotateY(180deg); }
+    #flashcard.flipped {
+      transform: rotateY(180deg);
+    }
     .flashcard-front, .flashcard-back {
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
-    .flashcard-back { transform: rotateY(180deg); position: absolute; inset: 0; }
+    .flashcard-back {
+      transform: rotateY(180deg);
+      position: absolute;
+      inset: 0;
+    }
 
-    /* Score ring */
+    /* Clean progress ring */
     #completion-ring {
-      width: 80px; height: 80px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.5s ease;
-    }
-    #completion-ring::after {
-      content: attr(data-pct);
-      width: 60px; height: 60px; border-radius: 50%;
-      background: white;
-      display: flex; align-items: center; justify-content: center;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.4s ease;
     }
 
-    /* Tab scroll on mobile */
-    .tab-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-    .tab-scroll::-webkit-scrollbar { display: none; }
+    /* Micro-interactions */
+    .evidence-card {
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+    .evidence-card:hover {
+      border-color: #cbd5e1;
+      background-color: #ffffff;
+    }
 
-    /* Evidence cards */
-    .evidence-card { transition: box-shadow 0.15s; }
-    .evidence-card:hover { box-shadow: 0 4px 16px rgba(99,102,241,0.12); }
+    .task-row {
+      transition: background-color 0.12s ease;
+    }
+    .task-row:hover {
+      background-color: #f8fafc;
+    }
 
-    /* Task row */
-    .task-row { transition: background 0.15s; }
-    .task-row:hover { background: #f8faff; }
+    /* Hide scrollbars for tab scroll */
+    .tab-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .tab-scroll::-webkit-scrollbar {
+      display: none;
+    }
 
-    /* Spinner */
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .animate-spin { animation: spin 0.8s linear infinite; }
+    /* Modal Backdrop */
+    .modal-backdrop {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(3px);
+    }
 
-    /* Streak fire */
-    .streak-fire { animation: pulse 2s infinite; }
-    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-
-    /* Milestone card */
-    .milestone-card { transition: all 0.2s; }
-    .milestone-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-
-    /* Modal backdrop */
-    .modal-backdrop { background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); }
-
-    /* KPI card gradient */
-    .kpi-indigo { background: linear-gradient(135deg, #6366f1, #818cf8); }
-    .kpi-emerald { background: linear-gradient(135deg, #10b981, #34d399); }
-    .kpi-amber { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
-    .kpi-rose { background: linear-gradient(135deg, #ef4444, #f87171); }
-    .kpi-blue { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+    @keyframes spinSlow {
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spinSlow 1s linear infinite;
+    }
   </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 min-h-screen">
+<body class="min-h-screen flex flex-col font-sans selection:bg-blue-100 selection:text-blue-900">
 
 <!-- ═══════════════════════════════════════════════════════════════
-     GLOBAL ERROR BANNER
+     GLOBAL SYSTEM ALERT BANNER
 ════════════════════════════════════════════════════════════════ -->
-<div id="global-banner" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg text-sm font-medium transition-all duration-300"></div>
+<div id="global-banner" class="hidden fixed top-4 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-lg shadow-sm text-sm font-medium border transition-all duration-200"></div>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     NAV BAR
+     INSTITUTIONAL NAVIGATION BAR
 ════════════════════════════════════════════════════════════════ -->
-<nav class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-slate-100 shadow-sm">
-  <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+<header class="sticky top-0 z-40 bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
 
-    <!-- Brand -->
+    <!-- Brand Identity -->
     <button onclick="showView(isLoggedIn() ? (getRole()==='faculty' ? 'admin' : 'profile') : 'home')"
-      class="flex items-center gap-2 font-bold text-indigo-600 text-lg shrink-0 hover:opacity-80 transition-opacity">
-      <div class="w-7 h-7 bg-indigo-600 rounded-lg flex items-center justify-center">
-        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.347.058-.347-.347-.347.347-.347-.058a5 5 0 01-7.072 0z"/>
-        </svg>
+      class="flex items-center gap-3 text-left hover:opacity-90 transition-opacity shrink-0">
+      <div class="w-8 h-8 rounded-md bg-slate-900 text-white flex items-center justify-center font-bold text-sm tracking-tight shadow-xs">
+        KP
       </div>
-      <span class="hidden sm:block">StudentPulse <span class="text-slate-400 font-normal">AI</span></span>
+      <div class="flex flex-col">
+        <span class="font-bold text-slate-900 text-sm tracking-tight leading-none">StudentPulse AI</span>
+        <span class="text-[11px] text-slate-500 font-medium leading-tight mt-0.5">KIET Group of Institutions</span>
+      </div>
     </button>
 
-    <!-- Nav links (authenticated) -->
-    <div class="tab-scroll flex items-center gap-1 flex-1 max-w-lg">
+    <!-- Navigation Items (When Authenticated) -->
+    <nav class="tab-scroll flex items-center gap-1 flex-1 max-w-xl mx-4">
       <button data-nav="profile" data-auth-required onclick="showView('profile')"
-        class="hidden whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors border-b-2 border-transparent">
-        My Profile
+        class="hidden whitespace-nowrap px-3.5 py-4 text-xs tracking-normal font-medium text-slate-600 hover:text-slate-900 transition-colors border-b-2 border-transparent">
+        Profile & Evidence
       </button>
       <button data-nav="plan" data-auth-required onclick="showView('plan')"
-        class="hidden whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors border-b-2 border-transparent">
-        AI Plan
+        class="hidden whitespace-nowrap px-3.5 py-4 text-xs tracking-normal font-medium text-slate-600 hover:text-slate-900 transition-colors border-b-2 border-transparent">
+        AI Readiness Plan
       </button>
       <button data-nav="progress" data-auth-required onclick="showView('progress')"
-        class="hidden whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors border-b-2 border-transparent">
-        Progress
+        class="hidden whitespace-nowrap px-3.5 py-4 text-xs tracking-normal font-medium text-slate-600 hover:text-slate-900 transition-colors border-b-2 border-transparent">
+        Consistency & Streaks
       </button>
       <button data-nav="admin" data-auth-required data-role="faculty" onclick="showView('admin')"
-        class="hidden whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors border-b-2 border-transparent">
-        Cohort Hub
+        class="hidden whitespace-nowrap px-3.5 py-4 text-xs tracking-normal font-medium text-slate-600 hover:text-slate-900 transition-colors border-b-2 border-transparent">
+        Cohort Command Center
       </button>
-    </div>
+    </nav>
 
-    <!-- Auth links (unauthenticated) -->
+    <!-- Auth Actions (When Logged Out) -->
     <div id="nav-auth-links" class="flex items-center gap-2">
-      <button onclick="showView('login')" class="text-sm text-slate-600 hover:text-indigo-600 font-medium px-3 py-1.5 transition-colors">Sign In</button>
-      <button onclick="showView('register')" class="text-sm bg-indigo-600 text-white px-4 py-1.5 rounded-lg hover:bg-indigo-700 font-medium transition-colors">Get Started</button>
-    </div>
-
-    <!-- User menu (authenticated) -->
-    <div id="nav-user-menu" class="hidden flex items-center gap-2">
-      <span id="nav-name" class="text-sm font-medium text-slate-700 hidden sm:block max-w-28 truncate"></span>
-      <button onclick="handleLogout()" class="text-sm text-slate-500 hover:text-red-500 px-2 py-1 rounded transition-colors flex items-center gap-1">
-        <i data-lucide="log-out" class="w-4 h-4"></i>
-        <span class="hidden sm:inline">Logout</span>
+      <button onclick="showView('login')"
+        class="text-xs font-semibold text-slate-700 hover:text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-100 transition-colors">
+        Sign in
+      </button>
+      <button onclick="showView('register')"
+        class="text-xs font-semibold bg-blue-600 text-white px-3.5 py-1.5 rounded-md hover:bg-blue-700 transition-colors shadow-2xs">
+        Register account
       </button>
     </div>
+
+    <!-- User Status & Sign Out (When Logged In) -->
+    <div id="nav-user-menu" class="hidden flex items-center gap-3">
+      <div class="hidden sm:flex flex-col text-right">
+        <span id="nav-name" class="text-xs font-semibold text-slate-900 max-w-[140px] truncate leading-tight"></span>
+        <span class="text-[10px] text-slate-400 font-mono leading-none mt-0.5">@kiet.edu verified</span>
+      </div>
+      <button onclick="handleLogout()"
+        title="Sign out of StudentPulse"
+        class="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+      </button>
+    </div>
+
   </div>
-</nav>
+</header>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     VIEW 1: HOME & LOGIN
+     VIEW 1: HOME & ACCESS
 ════════════════════════════════════════════════════════════════ -->
+<main class="flex-1">
 <div id="view-home" class="sp-view">
-  <!-- Hero -->
-  <section class="gradient-hero text-white py-20 px-4">
-    <div class="max-w-4xl mx-auto text-center">
-      <div class="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 text-sm mb-6 backdrop-blur-sm">
-        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-        KIET Group of Institutions · AI Fundamentals & Python Programming
-      </div>
-      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-        Your AI-Powered<br/>
-        <span class="text-yellow-300">Career Launchpad</span>
-      </h1>
-      <p class="text-lg sm:text-xl text-white/85 max-w-2xl mx-auto mb-10">
-        Diagnose your skill gaps, generate a personalised 90-day roadmap, track progress daily,
-        and walk into every interview fully prepared — powered by Gemini 4 Hydrogen.
-      </p>
 
-      <!-- Demo login buttons -->
-      <div class="flex flex-col sm:flex-row gap-3 justify-center mb-6">
-        <button onclick="demoLogin('student')"
-          class="inline-flex items-center gap-2 bg-white text-indigo-700 px-6 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition-all shadow-lg shadow-indigo-900/20">
-          <i data-lucide="user" class="w-4 h-4"></i> 1-Click Student Demo
-        </button>
-        <button onclick="demoLogin('faculty')"
-          class="inline-flex items-center gap-2 bg-indigo-800/50 border border-white/30 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-800/70 transition-all">
-          <i data-lucide="users" class="w-4 h-4"></i> Faculty Demo
-        </button>
-        <button onclick="showView('register')"
-          class="inline-flex items-center gap-2 bg-yellow-400 text-yellow-900 px-6 py-3 rounded-xl font-semibold hover:bg-yellow-300 transition-all shadow-lg">
-          <i data-lucide="arrow-right" class="w-4 h-4"></i> Create Account
-        </button>
+  <!-- Institutional Hero -->
+  <section class="border-b border-slate-200 bg-white py-16 sm:py-20 px-4 sm:px-6">
+    <div class="max-w-5xl mx-auto">
+      
+      <!-- Meta badge -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-700 text-xs font-medium mb-6">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        AI Fundamentals & Python Programming · MSE-2 Prototype
       </div>
-      <p class="text-white/60 text-sm">@kiet.edu email required · Zero external dependencies in demo mode</p>
+
+      <!-- Headline & Value Prop -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <div class="lg:col-span-7 space-y-5">
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-950 leading-[1.12]">
+            Empowering students to diagnose skill gaps and enter tech interviews prepared.
+          </h1>
+          <p class="text-base text-slate-600 leading-relaxed max-w-xl">
+            StudentPulse AI evaluates your academic performance, project evidence, and code stack alignment against hiring matrices for Full-Stack, AI/ML, Backend, and Data Analyst roles.
+          </p>
+
+          <!-- Direct Access Actions -->
+          <div class="pt-3 flex flex-wrap gap-3">
+            <button onclick="demoLogin('student')"
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-xs transition-colors">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i> Launch student demo
+            </button>
+            <button onclick="demoLogin('faculty')"
+              class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors">
+              <i data-lucide="users" class="w-4 h-4"></i> Faculty cohort view
+            </button>
+            <button onclick="showView('register')"
+              class="inline-flex items-center gap-1.5 text-blue-700 hover:text-blue-800 text-sm font-semibold px-3 py-2.5 transition-colors">
+              Create account
+            </button>
+          </div>
+
+          <div class="pt-2 flex items-center gap-4 text-xs text-slate-500 font-mono">
+            <span>Domain: @kiet.edu</span>
+            <span>·</span>
+            <span>Offline fallback guarantee</span>
+            <span>·</span>
+            <span>Hybrid Gemini 4 / Groq</span>
+          </div>
+        </div>
+
+        <!-- Right: Technical Specification Panel -->
+        <div class="lg:col-span-5 border border-slate-200 rounded-xl bg-slate-50 p-5 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+              <span class="text-xs font-semibold text-slate-800 uppercase tracking-tight">Diagnostic framework</span>
+            </div>
+            <span class="text-xs font-mono text-slate-500">v1.0.0</span>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div class="bg-white p-3 rounded-lg border border-slate-200 flex items-start justify-between">
+              <div>
+                <p class="font-semibold text-slate-800">Academic & Assessment Index (35%)</p>
+                <p class="text-slate-500 mt-0.5">Weighted average of core exams, quizzes, and internal tests.</p>
+              </div>
+              <span class="font-mono text-slate-700 font-semibold text-xs ml-2">Exam 1.0x</span>
+            </div>
+
+            <div class="bg-white p-3 rounded-lg border border-slate-200 flex items-start justify-between">
+              <div>
+                <p class="font-semibold text-slate-800">Skill Alignment Index (40%)</p>
+                <p class="text-slate-500 mt-0.5">Keyword and tech-stack matching against role benchmark matrices.</p>
+              </div>
+              <span class="font-mono text-slate-700 font-semibold text-xs ml-2">Core 70%</span>
+            </div>
+
+            <div class="bg-white p-3 rounded-lg border border-slate-200 flex items-start justify-between">
+              <div>
+                <p class="font-semibold text-slate-800">Project & Practical Evidence (25%)</p>
+                <p class="text-slate-500 mt-0.5">Beginner, Intermediate, and Advanced deliverables with certifications.</p>
+              </div>
+              <span class="font-mono text-slate-700 font-semibold text-xs ml-2">Max 6.0</span>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-500 leading-normal">
+            Outputs an overall score (0–100), placement tier classification, and automated 4-milestone roadmap with interview rehearsal flashcards.
+          </p>
+        </div>
+      </div>
+
     </div>
   </section>
 
-  <!-- Feature cards -->
-  <section class="max-w-6xl mx-auto px-4 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-      <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
-        <i data-lucide="target" class="w-5 h-5 text-indigo-600"></i>
-      </div>
-      <h3 class="font-semibold text-slate-800 mb-2">Skill-Gap Radar</h3>
-      <p class="text-sm text-slate-500">AI-scored readiness across 5 axes against target role benchmarks.</p>
+  <!-- 4-Pillar Architecture Section -->
+  <section class="max-w-5xl mx-auto py-14 px-4 sm:px-6">
+    <div class="mb-8">
+      <h2 class="text-lg font-bold text-slate-900">Platform workflow</h2>
+      <p class="text-xs text-slate-500 mt-0.5">A complete 5-step journey structured across four coordinated views</p>
     </div>
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-      <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mb-4">
-        <i data-lucide="map" class="w-5 h-5 text-emerald-600"></i>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 space-y-2">
+        <div class="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-700 font-mono text-xs font-semibold">1</div>
+        <h3 class="text-sm font-semibold text-slate-900">Profile & Evidence</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">Establish your target engineering profile and maintain an authenticated locker of code projects and grades.</p>
       </div>
-      <h3 class="font-semibold text-slate-800 mb-2">90-Day Roadmap</h3>
-      <p class="text-sm text-slate-500">4-milestone editable action plan tailored to your daily study hours.</p>
-    </div>
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-      <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mb-4">
-        <i data-lucide="mic" class="w-5 h-5 text-amber-600"></i>
+
+      <div class="bg-white p-5 rounded-xl border border-slate-200 space-y-2">
+        <div class="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-700 font-mono text-xs font-semibold">2</div>
+        <h3 class="text-sm font-semibold text-slate-900">Skill-Gap Diagnostic</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">Multi-factor engine computes your readiness score and exposes exact missing skills against current tech requirements.</p>
       </div>
-      <h3 class="font-semibold text-slate-800 mb-2">Mock Interviews</h3>
-      <p class="text-sm text-slate-500">Project-specific flashcards powered by Gemini 4 Hydrogen AI.</p>
-    </div>
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-      <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-        <i data-lucide="trending-up" class="w-5 h-5 text-purple-600"></i>
+
+      <div class="bg-white p-5 rounded-xl border border-slate-200 space-y-2">
+        <div class="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-700 font-mono text-xs font-semibold">3</div>
+        <h3 class="text-sm font-semibold text-slate-900">Editable 90-Day Roadmap</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">A structured four-milestone action plan that can be customized, reordered, and updated as you build.</p>
       </div>
-      <h3 class="font-semibold text-slate-800 mb-2">Streak Tracking</h3>
-      <p class="text-sm text-slate-500">Daily consistency metrics, active days, and readiness score progression.</p>
+
+      <div class="bg-white p-5 rounded-xl border border-slate-200 space-y-2">
+        <div class="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center text-slate-700 font-mono text-xs font-semibold">4</div>
+        <h3 class="text-sm font-semibold text-slate-900">Consistency & Cohort Hub</h3>
+        <p class="text-xs text-slate-600 leading-relaxed">Daily streak tracking for students and an administrative command center with CSV exports for placement mentors.</p>
+      </div>
     </div>
   </section>
 
-  <!-- Team footer -->
-  <footer class="bg-slate-800 text-white py-10 px-4">
-    <div class="max-w-4xl mx-auto text-center">
-      <p class="text-slate-400 text-sm mb-4">MSE-2 Prototype · AI Fundamentals & Python Programming · KIET Group of Institutions</p>
-      <div class="flex flex-wrap justify-center gap-4 text-sm">
-        <span class="bg-slate-700 px-3 py-1 rounded-lg">👑 Amarjeet Kumar <span class="text-slate-400">2628MCA0069</span></span>
-        <span class="bg-slate-700 px-3 py-1 rounded-lg">Akhilesh Chaubey <span class="text-slate-400">2628MCA0206</span></span>
-        <span class="bg-slate-700 px-3 py-1 rounded-lg">Arpit Tiwari <span class="text-slate-400">2628MCA0240</span></span>
-        <span class="bg-slate-700 px-3 py-1 rounded-lg">Ankit Pathak <span class="text-slate-400">2628MCA0256</span></span>
-        <span class="bg-slate-700 px-3 py-1 rounded-lg">Archana Tiwari <span class="text-slate-400">2628MCA0030</span></span>
+  <!-- Institutional Footer with Team Attribution -->
+  <footer class="border-t border-slate-200 bg-white py-12 px-4 sm:px-6">
+    <div class="max-w-5xl mx-auto space-y-6">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <p class="text-sm font-semibold text-slate-900">KIET Group of Institutions</p>
+          <p class="text-xs text-slate-500 mt-0.5">Department of Computer Applications · Course: AI Fundamentals & Python Programming</p>
+        </div>
+        <span class="text-xs font-mono text-slate-500 bg-slate-100 px-2.5 py-1 rounded">MSE-2 Evaluation Prototype</span>
       </div>
-      <p class="text-slate-500 text-xs mt-6">Powered by Gemini 4 Hydrogen · Google Antigravity SDK · Flask · Chart.js 4.4 · Tailwind CSS</p>
+
+      <div class="border-t border-slate-100 pt-6">
+        <p class="text-xs font-semibold text-slate-700 mb-3">Project engineering team</p>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 text-xs">
+          <div class="p-2 rounded border border-slate-200 bg-slate-50">
+            <p class="font-semibold text-slate-900">Amarjeet Kumar</p>
+            <p class="text-slate-500 font-mono text-[11px]">2628MCA0069 · Lead</p>
+          </div>
+          <div class="p-2 rounded border border-slate-200 bg-slate-50">
+            <p class="font-semibold text-slate-900">Akhilesh Chaubey</p>
+            <p class="text-slate-500 font-mono text-[11px]">2628MCA0206</p>
+          </div>
+          <div class="p-2 rounded border border-slate-200 bg-slate-50">
+            <p class="font-semibold text-slate-900">Arpit Tiwari</p>
+            <p class="text-slate-500 font-mono text-[11px]">2628MCA0240</p>
+          </div>
+          <div class="p-2 rounded border border-slate-200 bg-slate-50">
+            <p class="font-semibold text-slate-900">Ankit Pathak</p>
+            <p class="text-slate-500 font-mono text-[11px]">2628MCA0256</p>
+          </div>
+          <div class="p-2 rounded border border-slate-200 bg-slate-50">
+            <p class="font-semibold text-slate-900">Archana Tiwari</p>
+            <p class="text-slate-500 font-mono text-[11px]">2628MCA0030</p>
+          </div>
+        </div>
+      </div>
     </div>
   </footer>
+
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
      VIEW: LOGIN
 ════════════════════════════════════════════════════════════════ -->
 <div id="view-login" class="sp-view hidden min-h-[calc(100vh-56px)] flex items-center justify-center p-4">
-  <div class="w-full max-w-sm glass-card rounded-2xl p-8 shadow-xl">
-    <div class="text-center mb-8">
-      <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
-        <i data-lucide="log-in" class="w-6 h-6 text-white"></i>
-      </div>
-      <h2 class="text-2xl font-bold text-slate-800">Welcome Back</h2>
-      <p class="text-slate-500 text-sm mt-1">Sign in with your @kiet.edu account</p>
+  <div class="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-7 shadow-xs">
+    
+    <div class="mb-6">
+      <h2 class="text-xl font-bold text-slate-900">Sign in to StudentPulse</h2>
+      <p class="text-xs text-slate-500 mt-1">Use your registered @kiet.edu credentials</p>
     </div>
+
     <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-        <input id="login-email" type="email" placeholder="you@kiet.edu" required
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition" />
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Institutional email</label>
+        <input id="login-email" type="email" placeholder="student@kiet.edu" required
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
       </div>
+
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
         <input id="login-password" type="password" placeholder="••••••••" required minlength="6"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition" />
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
       </div>
+
       <button id="login-btn" type="submit"
-        class="w-full bg-indigo-600 text-white py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition-colors mt-2">
-        Sign In
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors shadow-2xs">
+        Sign in
       </button>
     </form>
-    <div class="mt-6 space-y-2">
-      <div class="text-xs text-slate-400 text-center">— or use demo —</div>
-      <div class="flex gap-2">
-        <button onclick="demoLogin('student')" class="flex-1 text-sm border border-indigo-200 text-indigo-600 py-2 rounded-xl hover:bg-indigo-50 transition-colors font-medium">Student Demo</button>
-        <button onclick="demoLogin('faculty')" class="flex-1 text-sm border border-slate-200 text-slate-600 py-2 rounded-xl hover:bg-slate-50 transition-colors font-medium">Faculty Demo</button>
+
+    <div class="mt-6 pt-5 border-t border-slate-200 space-y-3">
+      <p class="text-xs text-slate-500 text-center font-medium">Evaluation quick access</p>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="demoLogin('student')"
+          class="text-xs font-medium text-slate-700 hover:bg-slate-50 border border-slate-300 py-1.5 px-2 rounded-md transition-colors text-center">
+          Student demo
+        </button>
+        <button onclick="demoLogin('faculty')"
+          class="text-xs font-medium text-slate-700 hover:bg-slate-50 border border-slate-300 py-1.5 px-2 rounded-md transition-colors text-center">
+          Faculty demo
+        </button>
       </div>
     </div>
-    <p class="text-center text-sm text-slate-500 mt-6">
-      No account? <button onclick="showView('register')" class="text-indigo-600 font-medium hover:underline">Create one</button>
+
+    <p class="text-center text-xs text-slate-500 mt-5">
+      New student? <button onclick="showView('register')" class="text-blue-600 hover:underline font-semibold">Create account</button>
     </p>
+
   </div>
 </div>
 
@@ -299,531 +445,677 @@
      VIEW: REGISTER
 ════════════════════════════════════════════════════════════════ -->
 <div id="view-register" class="sp-view hidden min-h-[calc(100vh-56px)] flex items-center justify-center p-4">
-  <div class="w-full max-w-sm glass-card rounded-2xl p-8 shadow-xl">
-    <div class="text-center mb-8">
-      <div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-3">
-        <i data-lucide="user-plus" class="w-6 h-6 text-white"></i>
-      </div>
-      <h2 class="text-2xl font-bold text-slate-800">Create Account</h2>
-      <p class="text-slate-500 text-sm mt-1">@kiet.edu email required</p>
+  <div class="w-full max-w-sm bg-white border border-slate-200 rounded-xl p-7 shadow-xs">
+
+    <div class="mb-6">
+      <h2 class="text-xl font-bold text-slate-900">Register profile</h2>
+      <p class="text-xs text-slate-500 mt-1">Requires an institutional @kiet.edu address</p>
     </div>
-    <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4">
+
+    <form id="register-form" onsubmit="handleRegister(event)" class="space-y-3.5">
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-        <input id="reg-name" type="text" placeholder="Your name" required minlength="2"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition" />
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Full name</label>
+        <input id="reg-name" type="text" placeholder="e.g. Amarjeet Kumar" required minlength="2"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
       </div>
+
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">KIET Email</label>
-        <input id="reg-email" type="email" placeholder="you@kiet.edu" required
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition" />
+        <label class="block text-xs font-semibold text-slate-700 mb-1">KIET email</label>
+        <input id="reg-email" type="email" placeholder="name@kiet.edu" required
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
       </div>
+
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Enrollment No. <span class="text-slate-400">(optional)</span></label>
-        <input id="reg-enrollment" type="text" placeholder="2628MCA0XXX"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition" />
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Enrollment number <span class="text-slate-400 font-normal">(optional)</span></label>
+        <input id="reg-enrollment" type="text" placeholder="2628MCA0069"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
       </div>
+
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-        <input id="reg-password" type="password" placeholder="••••••••" required minlength="6"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent transition" />
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Create password</label>
+        <input id="reg-password" type="password" placeholder="Minimum 6 characters" required minlength="6"
+          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent" />
       </div>
+
       <button id="register-btn" type="submit"
-        class="w-full bg-emerald-500 text-white py-2.5 rounded-xl font-semibold hover:bg-emerald-600 transition-colors mt-2">
-        Create Account
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors shadow-2xs mt-2">
+        Complete registration
       </button>
     </form>
-    <p class="text-center text-sm text-slate-500 mt-6">
-      Already have an account? <button onclick="showView('login')" class="text-indigo-600 font-medium hover:underline">Sign in</button>
+
+    <p class="text-center text-xs text-slate-500 mt-5">
+      Already have an account? <button onclick="showView('login')" class="text-blue-600 hover:underline font-semibold">Sign in</button>
     </p>
+
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
      VIEW 2: PROFILE & EVIDENCE CONTEXT
 ════════════════════════════════════════════════════════════════ -->
-<div id="view-profile" class="sp-view hidden max-w-7xl mx-auto px-4 py-8">
-  <!-- Header -->
-  <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+<div id="view-profile" class="sp-view hidden max-w-6xl mx-auto px-4 sm:px-6 py-8">
+
+  <!-- Header Banner -->
+  <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
     <div>
-      <h2 class="text-2xl font-bold text-slate-800">My Profile & Evidence</h2>
-      <p class="text-slate-500 text-sm mt-1">Build your evidence locker, then generate your AI plan</p>
+      <h2 class="text-xl font-bold text-slate-900">Profile & evidence locker</h2>
+      <p class="text-xs text-slate-500 mt-0.5">Define your target career trajectory and maintain your technical project ledger</p>
     </div>
     <button onclick="showView('plan')"
-      class="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-sm">
-      <i data-lucide="zap" class="w-4 h-4"></i> Go to AI Plan →
+      class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-2xs self-start sm:self-auto">
+      Open readiness diagnosis
     </button>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-    <!-- Left column: User card + Context form -->
-    <div class="space-y-6">
-      <!-- Profile card -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <div class="flex items-center gap-4 mb-4">
-          <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center text-white text-xl font-bold">
-            <span id="profile-initials">S</span>
-          </div>
-          <div class="min-w-0">
-            <p id="profile-name" class="font-bold text-slate-800 text-lg truncate">Student</p>
-            <p id="profile-email" class="text-sm text-slate-400 truncate"></p>
-            <p id="profile-enrollment" class="text-xs text-slate-300"></p>
-          </div>
+    <!-- Left column: Target Role Context Form (5 cols) -->
+    <div class="lg:col-span-4 space-y-5">
+      
+      <!-- Student Card -->
+      <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-md bg-slate-900 text-white flex items-center justify-center font-bold text-sm font-mono shrink-0">
+          <span id="profile-initials">AK</span>
+        </div>
+        <div class="min-w-0">
+          <p id="profile-name" class="font-bold text-slate-900 text-sm truncate leading-tight"></p>
+          <p id="profile-email" class="text-xs text-slate-500 truncate mt-0.5"></p>
+          <p id="profile-enrollment" class="text-[11px] font-mono text-slate-400 mt-0.5"></p>
         </div>
       </div>
 
-      <!-- Context form -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <h3 class="font-semibold text-slate-700 mb-4 flex items-center gap-2">
-          <i data-lucide="settings" class="w-4 h-4 text-indigo-500"></i> Learning Context
-        </h3>
+      <!-- Learning Context Form -->
+      <div class="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+        <div class="border-b border-slate-100 pb-3">
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Placement objective</h3>
+          <p class="text-[11px] text-slate-500 mt-0.5">Parameters driving the skill-gap scoring engine</p>
+        </div>
+
         <form onsubmit="saveContext(event)" class="space-y-4">
           <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wide">Target Role</label>
-            <select id="ctx-role" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Target job role</label>
+            <select id="ctx-role" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
               <option>Full-Stack Developer</option>
               <option>AI/ML Engineer</option>
               <option>Backend Python Developer</option>
               <option>Data Analyst</option>
             </select>
           </div>
+
           <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wide">Daily Study Hours</label>
-            <select id="ctx-hours" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
-              <option value="0.5">30 min / day</option>
-              <option value="1">1 hour / day</option>
-              <option value="2" selected>2 hours / day</option>
-              <option value="3">3 hours / day</option>
-              <option value="4">4 hours / day</option>
-              <option value="6">6 hours / day</option>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Daily study hours committed</label>
+            <select id="ctx-hours" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+              <option value="0.5">0.5 hours / day</option>
+              <option value="1">1.0 hour / day</option>
+              <option value="2">2.0 hours / day</option>
+              <option value="3">3.0 hours / day</option>
+              <option value="4">4.0 hours / day</option>
+              <option value="6">6.0 hours / day</option>
             </select>
           </div>
+
           <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1 uppercase tracking-wide">Current Focus Area</label>
-            <select id="ctx-focus" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Current focus concentration</label>
+            <select id="ctx-focus" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
               <option>Projects</option>
               <option>DSA/Coding</option>
               <option>Core CS</option>
               <option>Interview Prep</option>
             </select>
           </div>
-          <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors">
-            Save Context
+
+          <button type="submit"
+            class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-3 rounded-lg text-xs transition-colors shadow-2xs">
+            Save learning context
           </button>
         </form>
       </div>
+
     </div>
 
-    <!-- Right column: Evidence locker (3 tabs) -->
-    <div class="lg:col-span-2 space-y-6">
+    <!-- Right column: Evidence Locker (7 cols) -->
+    <div class="lg:col-span-8 space-y-6">
 
-      <!-- ASSESSMENTS -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-          <h3 class="font-semibold text-slate-700 flex items-center gap-2">
-            <span class="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center text-xs">📊</span>
-            Academic Assessments
-          </h3>
+      <!-- Academic Assessments -->
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+          <div>
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Academic assessments (35%)</h3>
+            <p class="text-[11px] text-slate-500">Record midterm, final, and test scores</p>
+          </div>
         </div>
-        <div class="p-5">
-          <form onsubmit="addAssessment(event)" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            <input id="a-subject" placeholder="Subject *" required class="col-span-2 sm:col-span-1 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-            <input id="a-score" type="number" placeholder="Score *" required min="0" class="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-            <input id="a-max" type="number" placeholder="Max (100)" value="100" class="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-            <div class="col-span-2 sm:col-span-1 flex gap-2">
-              <select id="a-type" class="flex-1 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                <option value="exam">Exam</option>
-                <option value="quiz">Quiz</option>
-                <option value="assignment">Assignment</option>
-              </select>
-              <button type="submit" class="bg-blue-500 text-white px-3 py-2 rounded-xl text-sm hover:bg-blue-600 transition-colors">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-              </button>
-            </div>
+
+        <div class="p-5 space-y-4">
+          <form onsubmit="addAssessment(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+            <input id="a-subject" placeholder="Subject name (e.g. Data Structures)" required
+              class="sm:col-span-5 px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <input id="a-score" type="number" placeholder="Score" required min="0"
+              class="sm:col-span-2 px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <input id="a-max" type="number" placeholder="Max" value="100"
+              class="sm:col-span-2 px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <select id="a-type" class="sm:col-span-2 px-2 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+              <option value="exam">Exam</option>
+              <option value="quiz">Quiz</option>
+              <option value="assignment">Assignment</option>
+            </select>
+            <button type="submit"
+              class="sm:col-span-1 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-xs flex items-center justify-center p-1.5 transition-colors">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            </button>
           </form>
-          <div id="assessment-list" class="space-y-2 max-h-48 overflow-y-auto">
-            <p class="text-slate-400 text-sm text-center py-4">Loading…</p>
+
+          <div id="assessment-list" class="space-y-1.5 max-h-52 overflow-y-auto">
+            <p class="text-xs text-slate-400 py-3 text-center font-mono">Loading assessment ledger…</p>
           </div>
         </div>
       </div>
 
-      <!-- PROJECTS -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
-        <div class="p-5 border-b border-slate-100">
-          <h3 class="font-semibold text-slate-700 flex items-center gap-2">
-            <span class="w-7 h-7 bg-purple-100 rounded-lg flex items-center justify-center text-xs">🚀</span>
-            Projects & Evidence
-          </h3>
+      <!-- Projects & Code Evidence -->
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+          <div>
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Project deliverables & practical evidence (25%)</h3>
+            <p class="text-[11px] text-slate-500">Document repositories and technical complexity</p>
+          </div>
         </div>
-        <div class="p-5">
-          <form onsubmit="addProject(event)" class="space-y-3 mb-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <input id="p-title" placeholder="Project Title *" required class="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" />
-              <input id="p-tech" placeholder="Tech Stack (Python, Flask, React…)" class="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" />
+
+        <div class="p-5 space-y-4">
+          <form onsubmit="addProject(event)" class="space-y-2.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <input id="p-title" placeholder="Project title *" required
+                class="px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+              <input id="p-tech" placeholder="Tech stack (Python, Flask, BERT, React...)"
+                class="px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
             </div>
-            <input id="p-desc" placeholder="Brief description" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" />
-            <div class="flex gap-3">
-              <select id="p-complexity" class="flex-1 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white">
+            <input id="p-desc" placeholder="Brief technical summary of architecture or deliverables"
+              class="w-full px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <div class="flex gap-2.5">
+              <select id="p-complexity" class="px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
                 <option>Beginner</option>
-                <option>Intermediate</option>
+                <option selected>Intermediate</option>
                 <option>Advanced</option>
               </select>
-              <input id="p-github" placeholder="GitHub URL (optional)" class="flex-1 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" />
-              <button type="submit" class="bg-purple-500 text-white px-4 py-2 rounded-xl text-sm hover:bg-purple-600 transition-colors">
-                <i data-lucide="plus" class="w-4 h-4"></i>
+              <input id="p-github" placeholder="GitHub URL (optional)"
+                class="flex-1 px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+              <button type="submit"
+                class="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-md text-xs font-semibold transition-colors">
+                Add project
               </button>
             </div>
           </form>
-          <div id="project-list" class="space-y-2 max-h-56 overflow-y-auto">
-            <p class="text-slate-400 text-sm text-center py-4">Loading…</p>
+
+          <div id="project-list" class="space-y-2 max-h-60 overflow-y-auto">
+            <p class="text-xs text-slate-400 py-3 text-center font-mono">Loading projects…</p>
           </div>
         </div>
       </div>
 
-      <!-- CERTIFICATIONS -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
-        <div class="p-5 border-b border-slate-100">
-          <h3 class="font-semibold text-slate-700 flex items-center gap-2">
-            <span class="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center text-xs">🏅</span>
-            Certifications & Hackathons
-          </h3>
+      <!-- Certifications & Competitive Achievements -->
+      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+          <div>
+            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Certifications & hackathons</h3>
+            <p class="text-[11px] text-slate-500">External credentials validating technical rigor</p>
+          </div>
         </div>
-        <div class="p-5">
-          <form onsubmit="addCert(event)" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            <input id="c-title" placeholder="Certification Title *" required class="col-span-2 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
-            <input id="c-issuer" placeholder="Issuer / Platform" class="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
-            <div class="flex gap-2">
-              <select id="c-type" class="flex-1 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white">
-                <option value="certification">Cert</option>
-                <option value="hackathon">Hackathon</option>
-                <option value="course">Course</option>
-              </select>
-              <button type="submit" class="bg-amber-500 text-white px-3 py-2 rounded-xl text-sm hover:bg-amber-600 transition-colors">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-              </button>
-            </div>
-            <input id="c-date" type="date" class="col-span-2 sm:col-span-4 px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400" />
+
+        <div class="p-5 space-y-4">
+          <form onsubmit="addCert(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+            <input id="c-title" placeholder="Credential title *" required
+              class="sm:col-span-5 px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <input id="c-issuer" placeholder="Issuer (Google, AWS, NIT...)"
+              class="sm:col-span-3 px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600" />
+            <select id="c-type" class="sm:col-span-2 px-2 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+              <option value="certification">Certification</option>
+              <option value="hackathon">Hackathon</option>
+              <option value="course">Course</option>
+            </select>
+            <button type="submit"
+              class="sm:col-span-2 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-xs font-semibold py-1.5 transition-colors">
+              Add
+            </button>
+            <input id="c-date" type="date"
+              class="sm:col-span-12 px-3 py-1 border border-slate-300 rounded-md text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600" />
           </form>
-          <div id="cert-list" class="space-y-2 max-h-48 overflow-y-auto">
-            <p class="text-slate-400 text-sm text-center py-4">Loading…</p>
+
+          <div id="cert-list" class="space-y-1.5 max-h-48 overflow-y-auto">
+            <p class="text-xs text-slate-400 py-3 text-center font-mono">Loading certifications…</p>
           </div>
         </div>
       </div>
+
     </div>
+
   </div>
+
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
      VIEW 3: AI READINESS & ACTION PLAN
 ════════════════════════════════════════════════════════════════ -->
-<div id="view-plan" class="sp-view hidden max-w-7xl mx-auto px-4 py-8">
+<div id="view-plan" class="sp-view hidden max-w-6xl mx-auto px-4 sm:px-6 py-8">
 
-  <!-- Loading state -->
-  <div id="plan-loading" class="hidden text-center py-24">
-    <div class="inline-flex items-center gap-3 text-slate-500">
-      <svg class="animate-spin w-6 h-6 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-      </svg>
-      <span class="text-lg font-medium">AI is analysing your profile…</span>
-    </div>
+  <!-- Loading State -->
+  <div id="plan-loading" class="hidden text-center py-24 space-y-3">
+    <div class="inline-flex items-center justify-center w-10 h-10 rounded-full border-2 border-slate-200 border-t-blue-600 animate-spin-slow"></div>
+    <p class="text-sm font-semibold text-slate-800">Generating placement readiness analysis</p>
+    <p class="text-xs text-slate-500 font-mono">Running hybrid engine · 5-second deterministic timeout active</p>
   </div>
 
-  <div id="plan-content" class="hidden">
-    <!-- Header -->
-    <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div id="plan-content" class="hidden space-y-6">
+
+    <!-- Header & Action -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
       <div>
-        <h2 class="text-2xl font-bold text-slate-800">AI Readiness & Action Plan</h2>
-        <p class="text-slate-500 text-sm mt-1">Powered by
-          <span id="ai-source-badge" class="inline-block bg-indigo-100 text-indigo-700 text-xs font-semibold px-2 py-0.5 rounded-full ml-1">—</span>
-        </p>
+        <h2 class="text-xl font-bold text-slate-900">Readiness diagnostic & 90-day plan</h2>
+        <div class="flex items-center gap-2 mt-0.5">
+          <span class="text-xs text-slate-500">Generated via</span>
+          <span id="ai-source-badge" class="font-mono text-[11px] font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Offline Engine</span>
+        </div>
       </div>
       <button id="generate-plan-btn" onclick="generatePlan()"
-        class="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition-colors shadow-sm">
-        <i data-lucide="zap" class="w-4 h-4"></i> Generate AI Plan
+        class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-2xs self-start sm:self-auto">
+        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Regenerate AI plan
       </button>
     </div>
 
-    <!-- Top row: Score + Radar -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Diagnostic Score Cards + Radar -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
 
-      <!-- Readiness score card -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Readiness Score</h3>
-        <div class="text-center mb-4">
-          <div class="text-6xl font-extrabold text-indigo-600" id="score-value">—</div>
-          <div class="text-slate-400 text-sm mt-1">/ 100</div>
-          <div id="score-tier" class="font-bold text-lg mt-2">—</div>
+      <!-- Overall Readiness Gauge (4 cols) -->
+      <div class="md:col-span-4 bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-800 uppercase tracking-tight">Composite score</span>
+            <span id="score-tier" class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700"></span>
+          </div>
+
+          <div class="my-5 text-left">
+            <div class="flex items-baseline gap-1">
+              <span id="score-value" class="text-5xl font-extrabold font-mono text-slate-900 tracking-tight">—</span>
+              <span class="text-slate-400 font-mono text-base">/ 100</span>
+            </div>
+            <p class="text-xs text-slate-500 mt-1">Weighted against placement benchmarks</p>
+          </div>
         </div>
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between items-center py-1.5 border-b border-slate-50">
-            <span class="text-slate-500">Academic (35%)</span>
-            <span class="font-semibold text-slate-700" id="score-academic">—</span>
+
+        <div class="border-t border-slate-100 pt-3 space-y-2 text-xs">
+          <div class="flex justify-between items-center py-1">
+            <span class="text-slate-500">Academic Index (35%)</span>
+            <span id="score-academic" class="font-mono font-semibold text-slate-800">—</span>
           </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-slate-50">
+          <div class="flex justify-between items-center py-1 border-t border-slate-100">
             <span class="text-slate-500">Skill Alignment (40%)</span>
-            <span class="font-semibold text-slate-700" id="score-skill">—</span>
+            <span id="score-skill" class="font-mono font-semibold text-slate-800">—</span>
           </div>
-          <div class="flex justify-between items-center py-1.5 border-b border-slate-50">
-            <span class="text-slate-500">Evidence (25%)</span>
-            <span class="font-semibold text-slate-700" id="score-evidence">—</span>
+          <div class="flex justify-between items-center py-1 border-t border-slate-100">
+            <span class="text-slate-500">Practical Evidence (25%)</span>
+            <span id="score-evidence" class="font-mono font-semibold text-slate-800">—</span>
           </div>
-          <div class="flex justify-between items-center pt-1">
-            <span class="text-slate-500">Skill Match</span>
-            <span class="font-semibold text-indigo-600" id="score-match-pct">—</span>
+          <div class="flex justify-between items-center py-1 border-t border-slate-100 font-medium">
+            <span class="text-slate-700">Skill matrix match</span>
+            <span id="score-match-pct" class="font-mono font-bold text-blue-700">—</span>
           </div>
         </div>
       </div>
 
-      <!-- Radar chart -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Skill Radar</h3>
-        <div style="height:220px; position:relative;">
+      <!-- Radar Diagnostic Chart (4 cols) -->
+      <div class="md:col-span-4 bg-white border border-slate-200 rounded-xl p-5">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-slate-800 uppercase tracking-tight">Competency polygon</span>
+          <span class="text-[11px] font-mono text-slate-400">5-axis</span>
+        </div>
+        <div class="relative h-[210px] w-full">
           <canvas id="radar-chart"></canvas>
         </div>
       </div>
 
-      <!-- Skill gaps -->
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Skill Profile</h3>
-        <p class="text-xs text-slate-400 mb-2 font-medium">✅ Matched Skills</p>
-        <div id="matched-skills" class="flex flex-wrap gap-1.5 mb-4"></div>
-        <p class="text-xs text-slate-400 mb-2 font-medium">❌ Missing Skills</p>
-        <div id="missing-skills" class="flex flex-wrap gap-1.5"></div>
+      <!-- Skills Matrix Breakdown (4 cols) -->
+      <div class="md:col-span-4 bg-white border border-slate-200 rounded-xl p-5 flex flex-col justify-between">
+        <div class="space-y-4">
+          <div>
+            <div class="flex items-center gap-1.5 text-xs font-bold text-slate-900 uppercase tracking-tight mb-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Verified matched skills
+            </div>
+            <div id="matched-skills" class="flex flex-wrap gap-1 max-h-24 overflow-y-auto"></div>
+          </div>
+
+          <div class="border-t border-slate-100 pt-3">
+            <div class="flex items-center gap-1.5 text-xs font-bold text-slate-900 uppercase tracking-tight mb-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+              Critical skill gaps
+            </div>
+            <div id="missing-skills" class="flex flex-wrap gap-1 max-h-24 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-400 border-t border-slate-100 pt-2 font-mono mt-3">
+          Benchmarks mapped to target job profile
+        </p>
       </div>
+
     </div>
 
-    <!-- AI Diagnosis banner -->
-    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-5 mb-6">
-      <p class="text-xs font-bold text-indigo-400 uppercase tracking-wider mb-2">🧠 AI Diagnosis</p>
-      <p id="ai-diagnosis" class="text-slate-700 leading-relaxed">Generate your AI plan to see a personalised diagnosis.</p>
+    <!-- AI Career Diagnosis Note -->
+    <div class="border border-blue-200 bg-blue-50/60 rounded-xl p-4 sm:p-5">
+      <div class="flex items-center gap-2 mb-1.5">
+        <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+        <span class="text-xs font-bold text-blue-950 uppercase tracking-tight">AI Mentor Diagnosis</span>
+      </div>
+      <p id="ai-diagnosis" class="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium"></p>
     </div>
 
-    <!-- 4-Milestone Roadmap -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 mb-6">
-      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-        <h3 class="font-semibold text-slate-700 flex items-center gap-2">
-          <i data-lucide="map" class="w-4 h-4 text-indigo-500"></i> 90-Day Action Roadmap
-          <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full ml-1">Editable</span>
-        </h3>
+    <!-- 4-Milestone Action Roadmap -->
+    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+        <div>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">90-Day Placement Action Plan</h3>
+          <p class="text-[11px] text-slate-500">Sequential milestones tailored to your study hours · Fully editable</p>
+        </div>
       </div>
+
       <div class="p-5">
         <div id="milestones-container" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
       </div>
     </div>
 
     <!-- Mock Interview Flashcards -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
-      <div class="p-5 border-b border-slate-100">
-        <h3 class="font-semibold text-slate-700 flex items-center gap-2">
-          <i data-lucide="mic" class="w-4 h-4 text-amber-500"></i> Interview Prep Flashcards
-          <span id="flashcard-counter" class="text-xs bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full ml-1"></span>
-        </h3>
+    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+        <div>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Project-Specific Interview Questions</h3>
+          <p class="text-[11px] text-slate-500">Questions derived directly from your documented evidence and target role</p>
+        </div>
+        <span id="flashcard-counter" class="text-xs font-mono text-slate-600 font-semibold bg-white border border-slate-200 px-2 py-0.5 rounded"></span>
       </div>
+
       <div class="p-6">
-        <div class="flashcard-wrapper relative max-w-2xl mx-auto" style="height:160px;">
+        <div class="flashcard-wrapper relative max-w-xl mx-auto h-40">
           <div id="flashcard" onclick="flipFlashcard()" class="absolute inset-0">
-            <div class="flashcard-front absolute inset-0 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 flex items-center justify-center border border-indigo-100 cursor-pointer">
-              <p id="flashcard-text" class="text-center text-slate-700 font-medium text-base leading-relaxed">Generate your AI plan to unlock interview questions.</p>
+            <!-- Front -->
+            <div class="flashcard-front absolute inset-0 bg-slate-50 border border-slate-300 rounded-xl p-6 flex flex-col justify-between hover:border-slate-400 transition-colors">
+              <span class="text-[11px] font-mono text-slate-400">Technical interview challenge</span>
+              <p id="flashcard-text" class="text-center text-slate-900 font-medium text-sm sm:text-base leading-snug px-4"></p>
+              <span class="text-[11px] text-center text-slate-400">Click card to reveal answer strategy</span>
             </div>
-            <div class="flashcard-back absolute inset-0 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 flex items-center justify-center border border-emerald-100">
-              <p class="text-center text-slate-600 text-sm">Think through your answer, then click to go back ↩</p>
+            <!-- Back -->
+            <div class="flashcard-back absolute inset-0 bg-blue-50 border border-blue-200 rounded-xl p-6 flex flex-col justify-between">
+              <span class="text-[11px] font-mono text-blue-700 font-semibold">Answer framework</span>
+              <p class="text-center text-blue-950 text-xs sm:text-sm leading-relaxed px-4">
+                Structure with STAR method: Situation, Technical Decision, Execution Challenges, and Quantified Outcome from your project repository.
+              </p>
+              <span class="text-[11px] text-center text-blue-600">Click to return to question</span>
             </div>
           </div>
         </div>
-        <div class="flex items-center justify-center gap-4 mt-6">
-          <button onclick="prevFlashcard()" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-slate-500 hover:text-slate-700">
-            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+
+        <div class="flex items-center justify-center gap-3 mt-5">
+          <button onclick="prevFlashcard()"
+            class="text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1">
+            <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i> Previous
           </button>
-          <span class="text-sm text-slate-400">Click card to flip</span>
-          <button onclick="nextFlashcard()" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors text-slate-500 hover:text-slate-700">
-            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+          <button onclick="nextFlashcard()"
+            class="text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1">
+            Next <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
           </button>
         </div>
       </div>
     </div>
+
   </div>
+
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     VIEW 4: PROGRESS & COHORT ANALYTICS
+     VIEW 4: PROGRESS & STREAK CONSISTENCY
 ════════════════════════════════════════════════════════════════ -->
-<div id="view-progress" class="sp-view hidden max-w-7xl mx-auto px-4 py-8">
-  <div class="mb-8">
-    <h2 class="text-2xl font-bold text-slate-800">Progress & Consistency</h2>
-    <p class="text-slate-500 text-sm mt-1">Your daily streak, task completion, and readiness score trend</p>
+<div id="view-progress" class="sp-view hidden max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+
+  <!-- Header -->
+  <div class="border-b border-slate-200 pb-5">
+    <h2 class="text-xl font-bold text-slate-900">Consistency & progression tracker</h2>
+    <p class="text-xs text-slate-500 mt-0.5">Measurement of active study days, milestone velocity, and readiness trajectory</p>
   </div>
 
-  <!-- KPI Cards -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <div class="kpi-indigo text-white rounded-2xl p-5 shadow-sm">
-      <div class="text-3xl font-extrabold mb-1 streak-fire" id="streak-count">—</div>
-      <div class="text-indigo-100 text-sm font-medium">🔥 Day Streak</div>
+  <!-- Key Metrics Row (4 Clean Cards) -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <span class="text-xs font-medium text-slate-500">Current study streak</span>
+      <div class="flex items-baseline gap-1 mt-2">
+        <span id="streak-count" class="text-3xl font-extrabold font-mono text-slate-900 tracking-tight">—</span>
+        <span class="text-xs font-medium text-slate-400">days</span>
+      </div>
+      <p class="text-[11px] text-slate-400 mt-1 font-mono">Consecutive task completions</p>
     </div>
-    <div class="kpi-emerald text-white rounded-2xl p-5 shadow-sm">
-      <div class="text-3xl font-extrabold mb-1" id="active-days">—</div>
-      <div class="text-emerald-100 text-sm font-medium">📅 Active Days (30d)</div>
+
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <span class="text-xs font-medium text-slate-500">Active days (30d)</span>
+      <div class="flex items-baseline gap-1 mt-2">
+        <span id="active-days" class="text-3xl font-extrabold font-mono text-slate-900 tracking-tight">—</span>
+        <span class="text-xs font-medium text-slate-400">/ 30</span>
+      </div>
+      <p class="text-[11px] text-slate-400 mt-1 font-mono">Recorded log activity</p>
     </div>
-    <div class="kpi-amber text-white rounded-2xl p-5 shadow-sm">
-      <div class="text-3xl font-extrabold mb-1" id="tasks-done">—</div>
-      <div class="text-amber-100 text-sm font-medium">✅ Tasks Done</div>
+
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <span class="text-xs font-medium text-slate-500">Milestone deliverables</span>
+      <div class="flex items-baseline gap-1 mt-2">
+        <span id="tasks-done" class="text-3xl font-extrabold font-mono text-slate-900 tracking-tight">—</span>
+      </div>
+      <p class="text-[11px] text-slate-400 mt-1 font-mono">Tasks checked off plan</p>
     </div>
-    <div class="kpi-blue text-white rounded-2xl p-5 shadow-sm">
-      <div class="text-3xl font-extrabold mb-1" id="completion-pct">—</div>
-      <div class="text-blue-100 text-sm font-medium">📈 Plan Complete</div>
+
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <span class="text-xs font-medium text-slate-500">Roadmap completion</span>
+      <div class="flex items-baseline gap-1 mt-2">
+        <span id="completion-pct" class="text-3xl font-extrabold font-mono text-blue-700 tracking-tight">—</span>
+      </div>
+      <p class="text-[11px] text-slate-400 mt-1 font-mono">Progress toward interview ready</p>
     </div>
+
   </div>
 
-  <!-- Charts row -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-      <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Weekly Activity</h3>
-      <div style="height:200px; position:relative;">
+  <!-- Progress Visualizations -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+    
+    <div class="bg-white border border-slate-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Weekly activity volume</h3>
+          <p class="text-[11px] text-slate-500">Tasks completed per day over past 7 days</p>
+        </div>
+      </div>
+      <div class="relative h-52">
         <canvas id="weekly-chart"></canvas>
       </div>
     </div>
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-      <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Readiness Score Trend</h3>
-      <div style="height:200px; position:relative;">
+
+    <div class="bg-white border border-slate-200 rounded-xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Readiness score trajectory</h3>
+          <p class="text-[11px] text-slate-500">Composite score evolution over recorded days</p>
+        </div>
+      </div>
+      <div class="relative h-52">
         <canvas id="score-chart"></canvas>
       </div>
     </div>
+
   </div>
+
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     VIEW: FACULTY / COHORT ADMIN
+     VIEW: FACULTY COHORT COMMAND CENTER
 ════════════════════════════════════════════════════════════════ -->
-<div id="view-admin" class="sp-view hidden max-w-7xl mx-auto px-4 py-8">
-  <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+<div id="view-admin" class="sp-view hidden max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
     <div>
-      <h2 class="text-2xl font-bold text-slate-800">Faculty Cohort Command Center</h2>
-      <p class="text-slate-500 text-sm mt-1">Real-time readiness analytics across all enrolled students</p>
+      <h2 class="text-xl font-bold text-slate-900">Faculty cohort command center</h2>
+      <p class="text-xs text-slate-500 mt-0.5">Institutional analytics across all registered placement candidates</p>
     </div>
     <button onclick="downloadCSV()"
-      class="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-sm">
-      <i data-lucide="download" class="w-4 h-4"></i> Export CSV
+      class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-2xs self-start sm:self-auto">
+      <i data-lucide="download" class="w-3.5 h-3.5"></i> Export candidate CSV
     </button>
   </div>
 
-  <!-- KPI cards -->
-  <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-    <div class="kpi-indigo text-white rounded-2xl p-4 shadow-sm">
-      <div class="text-3xl font-extrabold mb-1" id="kpi-total">—</div>
-      <div class="text-indigo-100 text-xs font-medium">Total Students</div>
+  <!-- Metric Overview -->
+  <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+    
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <span class="text-xs font-medium text-slate-500">Total enrolled</span>
+      <p id="kpi-total" class="text-2xl font-bold font-mono text-slate-900 mt-1">—</p>
     </div>
-    <div class="kpi-blue text-white rounded-2xl p-4 shadow-sm">
-      <div class="text-3xl font-extrabold mb-1" id="kpi-avg-score">—</div>
-      <div class="text-blue-100 text-xs font-medium">Avg Readiness</div>
+
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <span class="text-xs font-medium text-slate-500">Avg readiness</span>
+      <p id="kpi-avg-score" class="text-2xl font-bold font-mono text-slate-900 mt-1">—</p>
     </div>
-    <div class="kpi-emerald text-white rounded-2xl p-4 shadow-sm">
-      <div class="text-3xl font-extrabold mb-1" id="kpi-industry-ready">—</div>
-      <div class="text-emerald-100 text-xs font-medium">Industry Ready</div>
+
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <span class="text-xs font-medium text-emerald-700">Industry Ready</span>
+      <p id="kpi-industry-ready" class="text-2xl font-bold font-mono text-emerald-800 mt-1">—</p>
     </div>
-    <div class="kpi-amber text-white rounded-2xl p-4 shadow-sm">
-      <div class="text-3xl font-extrabold mb-1" id="kpi-developing">—</div>
-      <div class="text-amber-100 text-xs font-medium">Developing</div>
+
+    <div class="bg-white border border-slate-200 rounded-xl p-4">
+      <span class="text-xs font-medium text-blue-700">Developing</span>
+      <p id="kpi-developing" class="text-2xl font-bold font-mono text-blue-800 mt-1">—</p>
     </div>
-    <div class="kpi-rose text-white rounded-2xl p-4 shadow-sm">
-      <div class="text-3xl font-extrabold mb-1" id="kpi-needs-foundation">—</div>
-      <div class="text-rose-100 text-xs font-medium">Needs Foundation</div>
+
+    <div class="bg-white border border-slate-200 rounded-xl p-4 col-span-2 sm:col-span-1">
+      <span class="text-xs font-medium text-amber-700">Needs Foundation</span>
+      <p id="kpi-needs-foundation" class="text-2xl font-bold font-mono text-amber-800 mt-1">—</p>
     </div>
+
   </div>
 
-  <!-- Charts row -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-    <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-      <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Cohort Skill Gap Analysis</h3>
-      <div style="height:280px; position:relative;">
+  <!-- Analytical Charts -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+    
+    <div class="lg:col-span-8 bg-white border border-slate-200 rounded-xl p-5">
+      <div class="mb-4">
+        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Institutional skill gap prevalence</h3>
+        <p class="text-[11px] text-slate-500">Frequency of missing core competencies across the cohort</p>
+      </div>
+      <div class="relative h-64">
         <canvas id="skill-gap-chart"></canvas>
       </div>
     </div>
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-      <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Target Role Distribution</h3>
-      <div style="height:280px; position:relative;">
+
+    <div class="lg:col-span-4 bg-white border border-slate-200 rounded-xl p-5">
+      <div class="mb-4">
+        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Target role distribution</h3>
+        <p class="text-[11px] text-slate-500">Career aspirations distribution</p>
+      </div>
+      <div class="relative h-64 flex items-center justify-center">
         <canvas id="role-dist-chart"></canvas>
       </div>
     </div>
+
   </div>
 
-  <!-- Student table -->
-  <div class="bg-white rounded-2xl shadow-sm border border-slate-100">
-    <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center gap-3">
-      <h3 class="font-semibold text-slate-700 flex-1">Student Readiness Table</h3>
-      <div class="flex gap-2">
-        <input id="cohort-search" placeholder="Search name / enrollment…" oninput="filterCohortTable()"
-          class="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 w-48" />
+  <!-- Student Ledger Table -->
+  <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+    <div class="px-5 py-3.5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
+      <div>
+        <h3 class="text-xs font-bold text-slate-900 uppercase tracking-tight">Student candidate roster</h3>
+        <p class="text-[11px] text-slate-500">Real-time status of all evaluated MCA candidates</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <input id="cohort-search" placeholder="Filter by name / ID..." oninput="filterCohortTable()"
+          class="px-2.5 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 w-44" />
         <select id="tier-filter" onchange="filterCohortTable()"
-          class="px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
-          <option value="">All Tiers</option>
+          class="px-2.5 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
+          <option value="">All placement tiers</option>
           <option>Industry Ready</option>
           <option>Developing</option>
           <option>Needs Foundation</option>
         </select>
       </div>
     </div>
+
     <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead class="bg-slate-50 border-b border-slate-100">
+      <table class="w-full text-xs text-left">
+        <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[11px]">
           <tr>
-            <th class="px-4 py-3 text-left font-semibold text-slate-500">Name</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-500">Enrollment</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-500">Target Role</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-500">Score</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-500">Tier</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-500">Top Gaps</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-500">Progress</th>
+            <th class="px-4 py-3">Candidate</th>
+            <th class="px-4 py-3">Enrollment</th>
+            <th class="px-4 py-3">Target Role</th>
+            <th class="px-4 py-3">Score</th>
+            <th class="px-4 py-3">Placement Tier</th>
+            <th class="px-4 py-3">Key Skill Deficits</th>
+            <th class="px-4 py-3">Readiness Bar</th>
           </tr>
         </thead>
-        <tbody id="cohort-tbody">
-          <tr><td colspan="7" class="text-center py-8 text-slate-400">Loading cohort data…</td></tr>
+        <tbody id="cohort-tbody" class="divide-y divide-slate-100 font-normal">
+          <tr><td colspan="7" class="text-center py-8 text-slate-400 font-mono">Loading cohort ledger…</td></tr>
         </tbody>
       </table>
     </div>
   </div>
+
 </div>
+</main>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     MODALS
+     MODAL DIALOGS
 ════════════════════════════════════════════════════════════════ -->
 
-<!-- Add Task Modal -->
+<!-- Add Custom Task Modal -->
 <div id="add-task-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
   <div class="modal-backdrop absolute inset-0" onclick="hideAddTaskModal()"></div>
-  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 z-10">
-    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-      <i data-lucide="plus-circle" class="w-5 h-5 text-indigo-500"></i> Add Custom Task
-    </h3>
-    <form id="add-task-form" onsubmit="submitAddTask(event)" class="space-y-4">
+  <div class="relative bg-white border border-slate-200 rounded-xl shadow-lg w-full max-w-md p-6 z-10 space-y-4">
+    <div>
+      <h3 class="text-base font-bold text-slate-900">Add custom plan deliverable</h3>
+      <p class="text-xs text-slate-500 mt-0.5">Attach a specific engineering deliverable to this milestone</p>
+    </div>
+
+    <form id="add-task-form" onsubmit="submitAddTask(event)" class="space-y-3.5">
       <input type="hidden" id="modal-milestone" value="1" />
+      
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Task Title *</label>
-        <input id="modal-task-title" placeholder="e.g. Build a REST API with Flask" required
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Task title *</label>
+        <input id="modal-task-title" placeholder="e.g. Build JWT auth module with token refresh" required
+          class="w-full px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600" />
       </div>
+
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
-        <textarea id="modal-task-desc" rows="2" placeholder="Specific steps or resources…"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"></textarea>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Implementation description</label>
+        <textarea id="modal-task-desc" rows="2" placeholder="Specific libraries, references, or verification steps..."
+          class="w-full px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"></textarea>
       </div>
+
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Priority</label>
-          <select id="modal-task-priority" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Priority</label>
+          <select id="modal-task-priority" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
             <option>High</option>
             <option selected>Medium</option>
             <option>Low</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Target Date</label>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Target completion date</label>
           <input id="modal-task-date" type="date"
-            class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+            class="w-full px-2.5 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600" />
         </div>
       </div>
-      <div class="flex gap-3 pt-2">
-        <button type="button" onclick="hideAddTaskModal()" class="flex-1 py-2.5 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>
-        <button type="submit" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors">Add Task</button>
+
+      <div class="flex gap-2.5 pt-2">
+        <button type="button" onclick="hideAddTaskModal()"
+          class="flex-1 py-2 border border-slate-300 rounded-md text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+          Cancel
+        </button>
+        <button type="submit"
+          class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition-colors shadow-2xs">
+          Append task
+        </button>
       </div>
     </form>
   </div>
@@ -832,46 +1124,56 @@
 <!-- Edit Task Modal -->
 <div id="edit-task-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
   <div class="modal-backdrop absolute inset-0" onclick="hideEditTaskModal()"></div>
-  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 z-10">
-    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-      <i data-lucide="pencil" class="w-5 h-5 text-indigo-500"></i> Edit Task
-    </h3>
-    <form onsubmit="submitEditTask(event)" class="space-y-4">
+  <div class="relative bg-white border border-slate-200 rounded-xl shadow-lg w-full max-w-md p-6 z-10 space-y-4">
+    <div>
+      <h3 class="text-base font-bold text-slate-900">Update task details</h3>
+      <p class="text-xs text-slate-500 mt-0.5">Modify title, priority, or target deadline</p>
+    </div>
+
+    <form onsubmit="submitEditTask(event)" class="space-y-3.5">
       <input type="hidden" id="edit-task-id" />
+      
       <div>
-        <label class="block text-sm font-medium text-slate-700 mb-1">Task Title</label>
-        <input id="edit-task-title" placeholder="Task title"
-          class="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Task title</label>
+        <input id="edit-task-title" placeholder="Deliverable name"
+          class="w-full px-3 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600" />
       </div>
+
       <div class="grid grid-cols-2 gap-3">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Priority</label>
-          <select id="edit-task-priority" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Priority</label>
+          <select id="edit-task-priority" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600">
             <option>High</option>
             <option>Medium</option>
             <option>Low</option>
           </select>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Target Date</label>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Target date</label>
           <input id="edit-task-date" type="date"
-            class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+            class="w-full px-2.5 py-1.5 border border-slate-300 rounded-md text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600" />
         </div>
       </div>
-      <div class="flex gap-3 pt-2">
-        <button type="button" onclick="hideEditTaskModal()" class="flex-1 py-2.5 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">Cancel</button>
-        <button type="submit" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors">Save Changes</button>
+
+      <div class="flex gap-2.5 pt-2">
+        <button type="button" onclick="hideEditTaskModal()"
+          class="flex-1 py-2 border border-slate-300 rounded-md text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+          Cancel
+        </button>
+        <button type="submit"
+          class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold transition-colors shadow-2xs">
+          Save modifications
+        </button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Scripts -->
+<!-- Application Scripts -->
 <script src="/js/api.js"></script>
 <script src="/js/student.js"></script>
 <script src="/js/admin.js"></script>
 <script>
-  // Initialise Lucide icons after DOM ready
   document.addEventListener("DOMContentLoaded", () => {
     if (window.lucide) lucide.createIcons();
   });
